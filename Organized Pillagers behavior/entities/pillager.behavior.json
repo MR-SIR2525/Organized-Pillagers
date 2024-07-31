@@ -516,6 +516,10 @@
         ]
       },
 
+      "spawn_as_baby": {
+        "add": {"component_groups": ["baby"]}   //for testing purposes
+      },
+
       "minecraft:spawn_for_raid": {
         "add": {
           "component_groups": [
