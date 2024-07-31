@@ -1,0 +1,18 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Organized Pillagers (behavior)",
+    "description": "Dynamic and organized pillager behavior. They will build outposts and bases dynamically as the world progresses, and they will conduct more coordinated raids and attacks where they'll attack but also loot player and villager possessions. By MRxSIR.",
+    "uuid": "d484aa26-71ba-4eca-99a8-8becafc28b8f",
+    "min_engine_version": [1, 20, 10],
+    "version": [0, 0, 1]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "description": "behavior pack for Organized Pillagers addon",
+      "uuid": "de1dd81c-e012-454a-8a05-cd1200405955",
+      "version": [0, 0, 1]
+    }
+  ]
+}
