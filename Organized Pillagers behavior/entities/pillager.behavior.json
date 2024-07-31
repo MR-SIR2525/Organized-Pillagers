@@ -28,6 +28,7 @@
           }
         }
       },
+
       "minecraft:ranged_attack": {
         "minecraft:behavior.ranged_attack": {
           "priority": 4,
@@ -50,6 +51,7 @@
           }
         }
       },
+
       "minecraft:melee_attack": {
         "minecraft:behavior.melee_box_attack": {
           "priority": 4,
@@ -70,6 +72,7 @@
           }
         }
       },
+
       "minecraft:raid_configuration": {
         "minecraft:dweller": {
           "dwelling_type": "village",
@@ -94,9 +97,11 @@
           "event_name": "ambient.in.raid"
         }
       },
+
       "minecraft:raid_persistence": {
         "minecraft:persistent": {}
       },
+
       "minecraft:illager_squad_captain": {
         "minecraft:is_illager_captain": {
         },
@@ -124,6 +129,7 @@
           "target": "self"
         }
       },
+
       "minecraft:patrol_captain": {
         "minecraft:is_illager_captain": {
         },
@@ -171,6 +177,7 @@
           "block_distance": 512
         }
       },
+
       "minecraft:patrol_follower": {
         "minecraft:behavior.follow_target_captain": {
           "priority": 5,
@@ -237,10 +244,7 @@
         "damage_conditions": [
           {
             "filters": {
-              "test": "in_lava",
-              "subject": "self",
-              "operator": "==",
-              "value": true
+              "test": "in_lava", "subject": "self", "operator": "==", "value": true
             },
             "cause": "lava",
             "damage_per_tick": 4
@@ -324,11 +328,7 @@
           {
             "filters": {
               "all_of": [
-                {
-                  "test": "is_family",
-                  "subject": "other",
-                  "value": "villager"
-                },
+                {"test": "is_family", "subject": "other", "value": "villager"},
                 {
                   "test": "has_component",
                   "subject": "other",
@@ -381,11 +381,10 @@
     "events": {
       "minecraft:entity_spawned": {
         "add": {
-          "component_groups": [
-            "minecraft:ranged_attack"
-          ]
+          "component_groups": ["minecraft:ranged_attack"]
         }
       },
+
       "minecraft:spawn_for_raid": {
         "add": {
           "component_groups": [
@@ -395,6 +394,7 @@
           ]
         }
       },
+
       "minecraft:spawn_as_patrol_follower": {
         "add": {
           "component_groups": [
@@ -403,6 +403,7 @@
           ]
         }
       },
+
       "minecraft:spawn_as_illager_captain": {
         "add": {
           "component_groups": [
@@ -411,6 +412,7 @@
           ]
         }
       },
+
       "minecraft:promote_to_illager_captain": {
         "add": {
           "component_groups": [
@@ -424,6 +426,7 @@
           ]
         }
       },
+
       "minecraft:promote_to_patrol_captain": {
         "add": {
           "component_groups": [
@@ -437,14 +440,17 @@
           ]
         }
       },
+
       "minecraft:melee_mode": {
         "remove": { "component_groups": [ "minecraft:ranged_attack" ] },
         "add": { "component_groups": [ "minecraft:melee_attack" ] }
       },
+
       "minecraft:ranged_mode": {
         "remove": { "component_groups": [ "minecraft:melee_attack" ] },
         "add": { "component_groups": [ "minecraft:ranged_attack" ] }
       },
+
       "minecraft:start_celebrating": { // Event must be called exactly this for village to fire it when a raid is lost
         "sequence": [
           {
@@ -456,9 +462,11 @@
           }
         ]
       },
+
       "minecraft:stop_celebrating": {
         "remove": { "component_groups": [ "minecraft:celebrate" ] }
       },
+
       "minecraft:raid_expired": {
         "sequence": [
           {
@@ -467,6 +475,7 @@
           }
         ]
       },
+      
       "minecraft:calm": {
         "remove": { "component_groups": [ "minecraft:melee_attack", "minecraft:ranged_attack" ] }
       }
