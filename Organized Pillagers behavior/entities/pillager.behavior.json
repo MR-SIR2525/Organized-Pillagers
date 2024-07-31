@@ -207,6 +207,120 @@
           "event": "minecraft:calm",
           "target": "self"
         }
+      },
+
+      "able_to_breed": {
+        //these say "only able to be used by villagers," but we will see
+        "minecraft:behavior.make_love": {
+          "priority": 6
+        },
+        "minecraft:behavior.receive_love": {
+          "priority": 7
+        }
+      },
+
+      "baby": {
+        "minecraft:is_baby": {},
+        "minecraft:scale": {
+          "value":0.5
+        },
+        "minecraft:ageable": {
+          "duration": 1200,
+          "grow_up": {
+            "event": "minecraft:ageable_grow_up",
+            "target": "self"
+          }
+        },
+        "minecraft:attack": {
+          "damage": 1.5
+        },
+        "minecraft:behavior.explore_outskirts":{  //might not work...
+          "priority": 11
+        },
+
+        "minecraft:preferred_path" : {
+          "max_fall_blocks" : 1,
+          "jump_cost" : 5,
+          "default_block_cost" : 1.5,
+          "preferred_path_blocks" : [
+            { 
+              "cost" : 0,
+              "blocks" : [ 
+                "grass_path"
+              ]
+            },
+            { 
+              "cost" : 1,
+              "blocks" : [ 
+                "cobblestone", 
+                "stone",
+                "stonebrick",
+                "sandstone",
+                "mossy_cobblestone",
+                "stone_slab",
+                "stone_slab2",
+                "stone_slab3",
+                "stone_slab4",
+                "double_stone_slab",
+                "double_stone_slab2",
+                "double_stone_slab3",
+                "double_stone_slab4",
+                "wooden_slab",
+                "double_wooden_slab",
+                "planks",
+                "brick_block",
+                "nether_brick",
+                "red_nether_brick",
+                "end_bricks",
+                "red_sandstone",
+                "stained_glass",
+                "glass",
+                "glowstone",
+                "prismarine",
+                "emerald_block",
+                "diamond_block",
+                "lapis_block",
+                "gold_block",
+                "redstone_block",
+                "purple_glazed_terracotta",
+                "white_glazed_terracotta",
+                "orange_glazed_terracotta",
+                "magenta_glazed_terracotta",
+                "light_blue_glazed_terracotta",
+                "yellow_glazed_terracotta",
+                "lime_glazed_terracotta",
+                "pink_glazed_terracotta",
+                "gray_glazed_terracotta",
+                "silver_glazed_terracotta",
+                "cyan_glazed_terracotta",
+                "blue_glazed_terracotta",
+                "brown_glazed_terracotta",
+                "green_glazed_terracotta",
+                "red_glazed_terracotta",
+                "black_glazed_terracotta"
+               ]
+            },
+            { 
+              "cost" : 50,
+              "blocks" : [ 
+                "bed",
+                "lectern",
+                "composter",
+                "grindstone",
+                "blast_furnace",
+                "smoker",
+                "fletching_table",
+                "cartography_table",
+                "brewing_stand",
+                "smithing_table",
+                "cauldron",
+                "barrel",
+                "loom",
+                "stonecutter"
+              ]
+            }
+          ]
+        }
       }
     },
 
@@ -380,9 +494,26 @@
 
     "events": {
       "minecraft:entity_spawned": {
-        "add": {
-          "component_groups": ["minecraft:ranged_attack"]
-        }
+        "sequence": [
+          {
+            "filters": {
+              "any_of": [
+                {"test": "is_variant", "value": 0},
+                {"test": "has_component", "operator": "!=" , "value": "minecraft:variant"}
+              ]
+            },
+            "randomize": [
+              {
+                "weight": 95,
+                "add": {"component_groups": ["minecraft:ranged_attack"]}
+              },
+              {
+                "weight": 5,
+                "add": {"component_groups": ["baby"]}
+              }
+            ]
+          }
+        ]
       },
 
       "minecraft:spawn_for_raid": {
@@ -475,9 +606,15 @@
           }
         ]
       },
-      
+
       "minecraft:calm": {
         "remove": { "component_groups": [ "minecraft:melee_attack", "minecraft:ranged_attack" ] }
+      },
+
+      //new
+      "minecraft:ageable_grow_up": {
+        "remove": {"component_groups": ["baby"]},
+        "add": {"component_groups": ["minecraft:ranged_attack"]}
       }
     }
   }
