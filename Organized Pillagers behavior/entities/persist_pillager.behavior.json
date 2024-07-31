@@ -2,11 +2,12 @@
   "format_version": "1.21.0",
   "minecraft:entity": {
     "description": {
-      "identifier": "minecraft:pillager",
-      "spawn_category": "monster",
+      "identifier": "op:persistent_pillager",
+      // "spawn_category": "monster",
       "is_spawnable": true,
       "is_summonable": true
     },
+    //persists even in peaceful difficulty
 
     "component_groups": {
       "minecraft:celebrate": {
@@ -40,15 +41,29 @@
           "def": "minecraft:arrow"
         },
         "minecraft:environment_sensor": {
-          "triggers": {
-            "filters": {
-              "test": "is_underwater",
-              "subject": "self",
-              "operator": "==",
-              "value": true
+          "triggers": [
+            {
+              "filters": {
+                "test": "is_underwater",
+                "subject": "self",
+                "operator": "==",
+                "value": true
+              },
+              "event": "minecraft:melee_mode"
             },
-            "event": "minecraft:melee_mode"
-          }
+            {
+              "filters": {
+                "test": "is_difficulty", "value": "peaceful"
+              },
+              "event": "remove_look_for_targets"
+            },
+            {
+              "filters": {
+                "test": "is_difficulty", "operator": "!=", "value": "peaceful"
+              },
+              "event": "add_look_for_targets"
+            }
+          ]
         }
       },
 
@@ -61,26 +76,29 @@
           "damage": 3
         },
         "minecraft:environment_sensor": {
-          "triggers": {
-            "filters": {
-              "test": "in_water",
-              "subject": "self",
-              "operator": "==",
-              "value": false
+          "triggers": [
+            {
+              "filters": {
+                "test": "in_water",
+                "subject": "self",
+                "operator": "==",
+                "value": false
+              },
+              "event": "minecraft:ranged_mode"
             },
-            "event": "minecraft:ranged_mode"
-          }
-        }
-      },
-
-      "become_persistent_pillager": {
-        "minecraft:transformation": {
-          "drop_equipment": false,
-          "drop_inventory": false,
-          "into": "op:persistent_pillager",
-          "keep_level": true,
-          "keep_owner": true,
-          "preserve_equipment": true
+            {
+              "filters": {
+                "test": "is_difficulty", "value": "peaceful"
+              },
+              "event": "remove_look_for_targets"
+            },
+            {
+              "filters": {
+                "test": "is_difficulty", "operator": "!=", "value": "peaceful"
+              },
+              "event": "add_look_for_targets"
+            }
+          ]
         }
       },
 
@@ -605,12 +623,8 @@
                 "add": {"component_groups": ["minecraft:ranged_attack"]}
               },
               {
-                "weight": 3,
+                "weight": 5,
                 "trigger": "spawn_as_baby"
-              },
-              {
-                "weight": 2,
-                "trigger": "become_persistent_pillager"
               }
             ]
           }
@@ -623,12 +637,6 @@
       "spawn_as_baby": {
         "add": {"component_groups": ["baby"]},   
         "remove": {"component_groups": ["equipment"]}
-      },
-
-      "become_persistent_pillager": {
-        "add": {
-          "component_groups": ["become_persistent_pillager"]
-        }
       },
 
       "minecraft:spawn_for_raid": {
@@ -659,12 +667,39 @@
         }
       },
 
+      "minecraft:entity_transformed": {
+        "sequence": [
+          {
+            "filters": {
+              "test": "has_component", "subject": "other", "value": "minecraft:is_baby"
+            },
+            "add": {"component_groups": ["baby"]}
+          }
+        ]
+      },
+
       "add_look_for_targets": {
-        "add": {"component_groups": ["look_for_targets"]}
+        "add": {"component_groups": ["look_for_targets"]},
+        "queue_command": {
+          "command": [
+            "tag @s remove peaceful",
+            "msg @a[r=40] looks for targets now."
+          ]
+        }
       },
 
       "remove_look_for_targets": {
-        "remove": {"component_groups": ["look_for_targets"]}
+        "remove": {"component_groups": ["look_for_targets"]},
+        "queue_command": {
+          "command": [
+            "tag @s add peaceful",
+            "msg @a[r=40] stops looking for targets now."
+          ]
+        }
+      },
+
+      "peaceful": {
+        "trigger": "remove_look_for_targets"
       },
 
       "add_equipment": {
