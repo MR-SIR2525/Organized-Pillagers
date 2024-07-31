@@ -1,0 +1,4 @@
+- 7/31/24: 
+  - imported necessary files
+  - added baby pillager code
+  - added add/remove targeting for testing, future use.
