@@ -8,6 +8,16 @@
       "is_summonable": true,
       
       "properties": {
+        "var:peaceful_received": {
+          "client_sync": false,
+          "type": "bool",
+          "default": false
+        },
+        "var:not_peaceful_received": {
+          "client_sync": false,
+          "type": "bool",
+          "default": false
+        },
         "var:air_blocks_found": {
           "client_sync": false,
           "type": "int",
@@ -77,15 +87,21 @@
             },
             {
               "filters": {
-                "test": "is_difficulty", "value": "peaceful"
+                "all_of": [
+                  {"test": "bool_property", "domain": "var:peaceful_received", "value": false},
+                  {"test": "is_difficulty", "value": "peaceful"}
+                ]
               },
-              "event": "remove_active_hostility"
+              "event": "peaceful"
             },
             {
               "filters": {
-                "test": "is_difficulty", "operator": "!=", "value": "peaceful"
+                "all_of": [
+                  {"test": "bool_property", "domain": "var:not_peaceful_received", "value": false},
+                  {"test": "is_difficulty", "operator": "!=", "value": "peaceful"}
+                ]
               },
-              "event": "add_active_hostility"
+              "event": "not_peaceful"
             }
           ]
         }
@@ -112,15 +128,21 @@
             },
             {
               "filters": {
-                "test": "is_difficulty", "value": "peaceful"
+                "all_of": [
+                  {"test": "bool_property", "domain": "var:peaceful_received", "value": false},
+                  {"test": "is_difficulty", "value": "peaceful"}
+                ]
               },
-              "event": "remove_active_hostility"
+              "event": "peaceful"
             },
             {
               "filters": {
-                "test": "is_difficulty", "operator": "!=", "value": "peaceful"
+                "all_of": [
+                  {"test": "bool_property", "domain": "var:not_peaceful_received", "value": false},
+                  {"test": "is_difficulty", "operator": "!=", "value": "peaceful"}
+                ]
               },
-              "event": "add_active_hostility"
+              "event": "not_peaceful"
             }
           ]
         }
@@ -164,13 +186,14 @@
 
       "avoid_players_and_villagers": {
         "minecraft:behavior.avoid_mob_type": {
-          "priority": 5,
+          "priority": 3,
           "max_dist": 275,
           "max_flee": 265,
           "sprint_speed_multiplier": 1.0,
           "probability_per_strength": 0,
+          "ignore_visibilty": true,   //typo in game?
           "ignore_visibility": true,
-          "remove_target": true,
+          "remove_target": false,
           "entity_types": [
             {
               "filters": {
@@ -197,7 +220,7 @@
         }
       },
 
-      "persistent": {
+      "persistence": {
         "minecraft:persistent": {}
       },
 
@@ -766,6 +789,16 @@
         ]
       },
 
+      "persistence_on": {
+        "add": {"component_groups": ["persistence"]},
+        "queue_command": {"command": "msg @a[r=1500] §ePersistence on."}  //for debug
+      },
+
+      "persistence_off": {
+        "remove": {"component_groups": ["persistence"]},
+        "queue_command": {"command": "msg @a[r=1500] §ePersistence off."} //for debug
+      },
+
       "find_settled_pillagers": {
         //disarm since going to use attack targeting to control movement
         "trigger": "minecraft:calm",
@@ -798,6 +831,16 @@
         ]
       },
 
+      "belongs_to_settlement": {
+        "add": {"component_groups": ["belongs_to_settlement"]},
+        "queue_command": {"command": "msg @a[r=1500] §ebelongs to settlement."}  //for debug
+      },
+
+      "remove_belongs_to_settlement": {
+        "remove": {"component_groups": ["belongs_to_settlement"]},
+        "queue_command": {"command": "msg @a[r=1500] §eNo longer belongs to settlement."}  //for debug
+      },
+
       "target_acquired_during_search": {
         "sequence": [
           {
@@ -827,7 +870,7 @@
         "sequence": [
           {
             "queue_command": {  //for debug
-              "command": "msg @a[r=40] §eEscaped a player or villager event."
+              "command": "msg @a[r=1500] §eEscaped a player or villager event."
             }
           },
           {
@@ -854,39 +897,45 @@
       "avoid_players_and_villagers": {
         "add": {"component_groups": ["avoid_players_and_villagers"]},
         "queue_command": {
-          "command": "msg @a[r=40] §eAvoiding players and villagers."   //for debug
+          "command": "msg @a[r=1500] §eAvoiding players and villagers."   //for debug
         }
       },
 
       "stop_avoiding_players_and_villagers": {
         "remove": {"component_groups": ["avoid_players_and_villagers"]},
         "queue_command": {
-          "command": "msg @a[r=40] §e No longer avoiding players and villagers."   //for debug
+          "command": "msg @a[r=1500] §e No longer avoiding players and villagers."   //for debug
         }
+      },
+
+      "peaceful": {
+        "trigger": "remove_active_hostility",
+        "set_property": {
+          "var:peaceful_received": true,
+          "var:not_peaceful_received": false
+        }
+      },
+
+      "not_peaceful": {
+        "set_property": {
+          "var:not_peaceful_received": true,
+          "var:peaceful_received": false
+        },
+        "trigger": "add_active_hostility"
       },
 
       "add_active_hostility": {
         "add": {"component_groups": ["active_hostility"]},
         "queue_command": {
-          "command": [
-            "tag @s remove peaceful",
-            "msg @a[r=40] §eable to look for targets."   //for debug
-          ]
+          "command": "msg @a[r=1500] §eable to look for targets."   //for debug
         }
       },
 
       "remove_active_hostility": {
         "remove": {"component_groups": ["active_hostility"]},
         "queue_command": {
-          "command": [
-            "tag @s add peaceful",
-            "msg @a[r=40] §eno longer looking for targets."   //for debug
-          ]
+          "command": "msg @a[r=1500] §eno longer looking for targets."   //for debug
         }
-      },
-      "peaceful": {
-        "trigger": "remove_active_hostility"
-        //removes targeting, but not self defense capabilities
       },
 
       "add_equipment": {

@@ -1,3 +1,17 @@
+- 8/2/24:
+  - environment sensor for peaceful/not peaceful... needs work still
+  - tested avoid players and villagers behavior, tweaked events for this
+  - added debug messages
+  - added persistence on/off events
+  - added use attack behavior to find settled pillagers
+  - added properties (variables) for area scanning, function check air east 10x10
+  - added "default_pillager" family type for vanilla pillagers
+  - added events for belongs_to_settlement
+  - removed despawn from distance
+  - updated entity spawned, entity transformed events
+  - fixed sounds not working for persistent pillager
+  - fixed "on_escape" syntax for find_settled_pillagers
+
 - 7/31/24: 
   - imported necessary files
   - added baby pillager code
