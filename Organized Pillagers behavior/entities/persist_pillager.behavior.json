@@ -102,6 +102,67 @@
         }
       },
 
+      //using attack targeting to make our pillager move to settlement
+      "find_settled_pillagers": {
+        "minecraft:behavior.move_towards_target": {
+          "priority": 2,
+          "within_radius": 20
+        },
+        "minecraft:behavior.nearest_attackable_target": {
+          "attack_owner": false,
+          "must_reach": false,
+          "must_see": false,
+          "reselect_targets": true,
+          "scan_interval": 100,
+          "target_search_height": 350,
+          "entity_types": [
+            {
+              "filters": {
+                "any_of": [
+                  {"test": "is_family", "subject": "other", "value": "settled_pillager"},
+                  {"test": "is_family", "subject": "other", "value": "governor_pillager"}
+                ]
+              },
+              "max_dist": 600
+            }
+          ]
+        },
+        "minecraft:on_target_acquired": "target_acquired_during_search",
+        "minecraft:timer": {
+          "time": [1500, 2700],   //between 25 min to 45 min
+          "looping": false,
+          "time_down_event": {
+            "event": "find_settled_pillagers_timeout",
+            "target": "self"
+          }
+        }
+      },
+
+      "avoid_players_and_villagers": {
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 5,
+          "max_dist": 275,
+          "max_flee": 265,
+          "sprint_speed_multiplier": 1.1,
+          "probability_per_strength": 0,
+          "ignore_visibility": true,
+          "remove_target": true,
+          "entity_types": [
+            {
+              "filters": {
+                "any_of": [
+                  //{"test": "is_family", "subject": "other", "value": "player"},
+                  {"test": "is_family", "subject": "other", "value": "villager"},
+                  {"test": "is_family", "subject": "other", "value": "wandering_trader"},
+                  {"test": "has_tag", "subject": "other", "value": "pillagers_avoid"} //for testing
+                ]
+              }
+            }
+          ],
+          "on_escape_event": "escaped_players_and_villagers"
+        }
+      },
+
       "ticks_area": {
         "minecraft:tick_world": {
           "never_despawn": true,
@@ -435,7 +496,7 @@
         "height": 1.9
       },
       "minecraft:type_family": {
-        "family": [ "pillager", "monster", "illager", "mob" ]
+        "family": ["pillager", "searching_pillager", "persistent_pillager", "persist_pillager", "monster", "illager", "mob"]
       },
       "minecraft:variant": {
         "value": 0
@@ -486,17 +547,17 @@
       },
       "minecraft:jump.static": {
       },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
       "minecraft:nameable": {
       },
       "minecraft:equipment": {
         "table": "loot_tables/entities/pillager_gear.json"
       },
-      "minecraft:despawn": {
-        "despawn_from_distance": {}
-      },
-      "minecraft:behavior.float": {
-        "priority": 0
-      },
+      // "minecraft:despawn": {
+      //   "despawn_from_distance": {}
+      // },
       "minecraft:behavior.hurt_by_target": {
         "priority": 1,
         "entity_types": {
@@ -586,7 +647,7 @@
         "is_pushable_by_piston": true
       },
       "minecraft:follow_range": {
-        "value": 64
+        "value": 395
       }
     },
 
@@ -661,12 +722,100 @@
         ]
       },
 
-      "add_look_for_targets": {
-        "add": {"component_groups": ["look_for_targets"]},
+      "find_settled_pillagers": {
+        //disarm since going to use attack targeting to control movement
+        "trigger": "minecraft:calm",
+        "add": {"component_groups": ["find_settled_pillagers"]}
+      },
+
+      "find_settled_pillagers_timeout": {
+        "remove": {
+          "component_groups": ["find_settled_pillagers"]
+        },
+        "trigger": "avoid_players_and_villagers_to_create_settlement"
+      },
+
+      "avoid_players_and_villagers_to_create_settlement": {
+        "queue_command": {
+          "command": "tag @s add trying_to_create_settlement"
+        },
+        "add": {
+          "component_groups": ["avoid_players_and_villagers"]
+        }
+      },
+
+      "find_spot_to_create_settlement": {
+        "sequence": [
+          {
+            "filters": {
+              "test": "in_overworld", "value": true
+            }
+          }
+        ]
+      },
+
+      "target_acquired_during_search": {
+        "sequence": [
+          {
+            "filters": {
+              "any_of": [
+                {"test": "is_family", "subject": "target", "value": "settled_pillager"},
+                {"test": "is_family", "subject": "target", "value": "governor_pillager"}
+              ]
+            },
+            "remove": {"component_groups": ["minecraft:melee_attack", "minecraft:ranged_attack"]},
+            "trigger": "stop_avoiding_players_and_villagers"
+          },
+          {
+            //got attacked, need to defend self
+            "filters": {
+              "none_of": [
+                {"test": "is_family", "subject": "target", "value": "settled_pillager"},
+                {"test": "is_family", "subject": "target", "value": "governor_pillager"}
+              ]
+            },
+            "add": {"component_groups": ["minecraft:ranged_attack"]}
+          }
+        ]
+      },
+
+      "escaped_players_and_villagers": {
+        "sequence": [
+          {
+            "filters": {
+              "test": "has_tag", "subject": "self", "operator": "!=", "value": "trying_to_create_settlement"
+            },
+            "queue_command": {"command": [
+              //verify pillager is away from players/villagers, then remove avoid behavior
+              "execute as @s at @s unless entity @e[type=player,r=260] unless entity @e[type=villager,r=255] run event entity @s stop_avoiding_players_and_villagers"
+            ]}
+          },
+          {
+            "filters": {
+              "test": "has_tag", "subject": "self", "value": "trying_to_create_settlement"
+            },
+            "queue_command": {"command": [
+              //verify pillager is away from players/villagers, move to next step for settlement
+              "execute as @s at @s unless entity @e[type=player,r=260] unless entity @e[type=villager,r=255] run event entity @s find_spot_to_create_settlement"
+            ]}
+          }
+        ]
+      },
+
+      "avoid_players_and_villagers": {
+        "add": {"component_groups": ["avoid_players_and_villagers"]}
+      },
+
+      "stop_avoiding_players_and_villagers": {
+        "remove": {"component_groups": ["avoid_players_and_villagers"]}
+      },
+
+      "add_active_hostility": {
+        "add": {"component_groups": ["active_hostility"]},
         "queue_command": {
           "command": [
             "tag @s remove peaceful",
-            "msg @a[r=40] looks for targets now."
+            "msg @a[r=40] looks for targets now."   //for debug
           ]
         }
       },
