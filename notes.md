@@ -1,4 +1,11 @@
 **Pillager settlements/bases**
 - might have to declare them as dwelling inhabitants instead of hostiles...
   - for a raid, it switches back to hostile
-  - for raids, might need some sort of marker for pillager bases that cancels a raid at their own place lol. Essentially, it would be a check that occurs to see if the raid is trying to occur at a pillager village, for which it will be cancelled, otherwise it will continue.
+  - for raids, might need some sort of marker for pillager bases that cancels a raid at their own place lol. Essentially, it would be a check that occurs to see if the raid is trying to occur at a pillager village, for which it will be cancelled, otherwise it will continue...
+
+
+**Searching for settlements**
+- remove ranged, melee attack, and active hostility, add search for settled pillagers
+
+**Finding spot to create settlements**
+- Basically just identify flat ish area... then clear out trees if needed, then build a town center first? Maybe vanilla tower near the center?
