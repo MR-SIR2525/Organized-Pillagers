@@ -359,6 +359,12 @@
         }
       },
 
+      "belongs_to_settlement": {
+        "minecraft:type_family": {
+          "family": ["pillager", "settled_pillager", "persistent_pillager", "persist_pillager", "monster", "illager", "mob"]
+        }
+      },
+
       "stay_around_pillager_settlement": {
       },
 
@@ -368,8 +374,8 @@
         }
       },
 
-      "able_to_breed": {
         //these say "only able to be used by villagers," but we will see
+      "able_to_breed": {
         "minecraft:behavior.make_love": {
           "priority": 6
         },
@@ -541,7 +547,15 @@
         "value": 0.35
       },
       "minecraft:navigation.walk": {
-        "can_path_over_water": true
+        "can_path_over_water": true,
+        "avoid_damage_blocks": true,
+        "can_jump": true,
+        "can_swim": true
+      },
+      "minecraft:navigation.swim": {
+        "is_amphibious": false,
+        "can_walk": true,
+        "can_swim": true
       },
       "minecraft:movement.basic": {
       },
