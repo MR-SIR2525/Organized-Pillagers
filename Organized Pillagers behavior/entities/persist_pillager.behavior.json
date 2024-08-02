@@ -2,12 +2,36 @@
   "format_version": "1.21.0",
   "minecraft:entity": {
     "description": {
-      "identifier": "op:persistent_pillager",
+      "identifier": "op:persistent_pillager",         //persists even in peaceful difficulty
       // "spawn_category": "monster",
       "is_spawnable": true,
-      "is_summonable": true
+      "is_summonable": true,
+      
+      "properties": {
+        "var:air_blocks_found": {
+          "client_sync": false,
+          "type": "int",
+          "range": [-1, 1000],
+          "default": 0
+        },
+        "var:desired_air_blocks": {
+          "client_sync": false,
+          "type": "int",
+          "range": [-1, 1000],
+          "default": 0
+        },
+        "var:found_manmade_blocks": {
+          "client_sync": false,
+          "type": "bool",
+          "default": false
+        },
+        "var:site_is_ok": {
+          "client_sync": false,
+          "type": "bool",
+          "default": false
+        }
+      }
     },
-    //persists even in peaceful difficulty
 
     "component_groups": {
       "minecraft:celebrate": {
@@ -374,7 +398,7 @@
         }
       },
 
-        //these say "only able to be used by villagers," but we will see
+      //these say "only able to be used by villagers," but we will see
       "able_to_breed": {
         "minecraft:behavior.make_love": {
           "priority": 6
