@@ -167,7 +167,7 @@
           "priority": 5,
           "max_dist": 275,
           "max_flee": 265,
-          "sprint_speed_multiplier": 1.1,
+          "sprint_speed_multiplier": 1.0,
           "probability_per_strength": 0,
           "ignore_visibility": true,
           "remove_target": true,
@@ -183,7 +183,10 @@
               }
             }
           ],
-          "on_escape_event": "escaped_players_and_villagers"
+          "on_escape_event": {
+            "event": "escaped_players_and_villagers",
+            "target": "self"
+          }
         }
       },
 
@@ -694,17 +697,19 @@
                 {"test": "has_component", "operator": "!=" , "value": "minecraft:variant"}
               ]
             },
-            "randomize": [
-              {
-                "weight": 96, //adult
-                "add": {"component_groups": ["minecraft:ranged_attack"]}
-              },
-              {
-                "weight": 4,  //baby
-                "trigger": "spawn_as_baby"
-              }
-            ],
             "sequence": [
+              {
+                "randomize": [
+                  {
+                    "weight": 96, //adult
+                    "add": {"component_groups": ["minecraft:ranged_attack"]}
+                  },
+                  {
+                    "weight": 4,  //baby
+                    "trigger": "spawn_as_baby"
+                  }
+                ]
+              },
               {"trigger": "find_settled_pillagers"},
               {"trigger": "avoid_players_and_villagers"}
             ]
@@ -821,6 +826,11 @@
       "escaped_players_and_villagers": {
         "sequence": [
           {
+            "queue_command": {  //for debug
+              "command": "msg @a[r=40] §eEscaped a player or villager event."
+            }
+          },
+          {
             "filters": {
               "test": "has_tag", "subject": "self", "operator": "!=", "value": "trying_to_create_settlement"
             },
@@ -842,11 +852,17 @@
       },
 
       "avoid_players_and_villagers": {
-        "add": {"component_groups": ["avoid_players_and_villagers"]}
+        "add": {"component_groups": ["avoid_players_and_villagers"]},
+        "queue_command": {
+          "command": "msg @a[r=40] §eAvoiding players and villagers."   //for debug
+        }
       },
 
       "stop_avoiding_players_and_villagers": {
-        "remove": {"component_groups": ["avoid_players_and_villagers"]}
+        "remove": {"component_groups": ["avoid_players_and_villagers"]},
+        "queue_command": {
+          "command": "msg @a[r=40] §e No longer avoiding players and villagers."   //for debug
+        }
       },
 
       "add_active_hostility": {
