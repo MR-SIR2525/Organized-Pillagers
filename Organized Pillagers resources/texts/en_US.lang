@@ -1,0 +1,5 @@
+## Entities
+entity.op:persistent_pillager.name=Persistent Pillager
+
+## Spawn Eggs
+item.spawn_egg.entity.op:persistent_pillager.name=Spawn Persistent Pillager

@@ -2,7 +2,7 @@
   "entity_sounds": {
     "entities": {
       // piggy backing off of vanilla pillager sounds
-      "persistent_pillager" : {
+      "op:persistent_pillager" : {
         "events" : {
         "ambient" : "mob.pillager.idle",
         "ambient.in.raid" : {
