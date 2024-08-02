@@ -722,7 +722,7 @@
       },
       "spawn_as_baby": {
         "add": {"component_groups": ["baby"]},   
-        "remove": {"component_groups": ["equipment"]}
+        "remove": {"component_groups": ["equipment"]} //doesn't exactly work... fix later
       },
 
       "minecraft:spawn_for_raid": {
@@ -859,7 +859,7 @@
         "queue_command": {
           "command": [
             "tag @s remove peaceful",
-            "msg @a[r=40] looks for targets now."   //for debug
+            "msg @a[r=40] §eable to look for targets."   //for debug
           ]
         }
       },
@@ -869,7 +869,7 @@
         "queue_command": {
           "command": [
             "tag @s add peaceful",
-            "msg @a[r=40] stops looking for targets now."   //for debug
+            "msg @a[r=40] §eno longer looking for targets."   //for debug
           ]
         }
       },
@@ -887,11 +887,17 @@
       },
 
       "add_able_to_breed": {
-        "add": {"component_groups": ["able_to_breed"]}
+        "add": {"component_groups": ["able_to_breed"]},
+        "queue_command": {
+          "command": "msg @a[r=40] §eable to breed."   //for debug
+        }
       },
 
       "remove_able_to_breed": {
-        "remove": {"component_groups": ["able_to_breed"]}
+        "remove": {"component_groups": ["able_to_breed"]},
+        "queue_command": {
+          "command": "msg @a[r=40] §eno longer able to breed."   //for debug
+        }
       },
 
       "minecraft:promote_to_illager_captain": {

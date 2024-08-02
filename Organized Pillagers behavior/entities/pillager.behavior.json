@@ -250,7 +250,7 @@
         }
       },
 
-      "look_for_targets": {
+      "active_hostility": {
         "minecraft:behavior.nearest_attackable_target": {
           "priority": 2,
           "must_see": true,
@@ -434,7 +434,7 @@
         "height": 1.9
       },
       "minecraft:type_family": {
-        "family": [ "pillager", "monster", "illager", "mob" ]
+        "family": [ "pillager", "monster", "illager", "mob", "default_pillager" ]
       },
       "minecraft:variant": {
         "value": 0
@@ -659,12 +659,28 @@
         }
       },
 
-      "add_look_for_targets": {
-        "add": {"component_groups": ["look_for_targets"]}
+      "add_active_hostility": {
+        "add": {"component_groups": ["active_hostility"]},
+        "queue_command": {
+          "command": [
+            "tag @s remove peaceful",
+            "msg @a[r=40] §eable to look for targets."   //for debug
+          ]
+        }
       },
 
-      "remove_look_for_targets": {
-        "remove": {"component_groups": ["look_for_targets"]}
+      "remove_active_hostility": {
+        "remove": {"component_groups": ["active_hostility"]},
+        "queue_command": {
+          "command": [
+            "tag @s add peaceful",
+            "msg @a[r=40] §eno longer looking for targets."   //for debug
+          ]
+        }
+      },
+      "peaceful": {
+        "trigger": "remove_active_hostility"
+        //removes targeting, but not self defense capabilities
       },
 
       "add_equipment": {
@@ -676,11 +692,17 @@
       },
 
       "add_able_to_breed": {
-        "add": {"component_groups": ["able_to_breed"]}
+        "add": {"component_groups": ["able_to_breed"]},
+        "queue_command": {
+          "command": "msg @a[r=40] §eable to breed."   //for debug
+        }
       },
 
       "remove_able_to_breed": {
-        "remove": {"component_groups": ["able_to_breed"]}
+        "remove": {"component_groups": ["able_to_breed"]},
+        "queue_command": {
+          "command": "msg @a[r=40] §eno longer able to breed."   //for debug
+        }
       },
 
       "minecraft:promote_to_illager_captain": {
