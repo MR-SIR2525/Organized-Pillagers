@@ -55,13 +55,13 @@
               "filters": {
                 "test": "is_difficulty", "value": "peaceful"
               },
-              "event": "remove_look_for_targets"
+              "event": "remove_active_hostility"
             },
             {
               "filters": {
                 "test": "is_difficulty", "operator": "!=", "value": "peaceful"
               },
-              "event": "add_look_for_targets"
+              "event": "add_active_hostility"
             }
           ]
         }
@@ -90,13 +90,13 @@
               "filters": {
                 "test": "is_difficulty", "value": "peaceful"
               },
-              "event": "remove_look_for_targets"
+              "event": "remove_active_hostility"
             },
             {
               "filters": {
                 "test": "is_difficulty", "operator": "!=", "value": "peaceful"
               },
-              "event": "add_look_for_targets"
+              "event": "add_active_hostility"
             }
           ]
         }
@@ -268,7 +268,7 @@
         }
       },
 
-      "look_for_targets": {
+      "active_hostility": {
         "minecraft:behavior.nearest_attackable_target": {
           "priority": 2,
           "must_see": true,
@@ -278,21 +278,9 @@
             {
               "filters": {
                 "any_of": [
-                  {
-                    "test": "is_family",
-                    "subject": "other",
-                    "value": "player"
-                  },
-                  {
-                    "test": "is_family",
-                    "subject": "other",
-                    "value": "irongolem"
-                  },
-                  {
-                    "test": "is_family",
-                    "subject": "other",
-                    "value": "wandering_trader"
-                  }
+                  {"test": "is_family", "subject": "other", "value": "player"},
+                  {"test": "is_family", "subject": "other", "value": "irongolem"},
+                  {"test": "is_family", "subject": "other", "value": "wandering_trader"}
                 ]
               },
               "max_dist": 16
@@ -301,12 +289,7 @@
               "filters": {
                 "all_of": [
                   {"test": "is_family", "subject": "other", "value": "villager"},
-                  {
-                    "test": "has_component",
-                    "subject": "other",
-                    "operator": "!=",
-                    "value": "minecraft:is_baby"
-                  }
+                  {"test": "has_component", "subject": "other", "operator": "!=", "value": "minecraft:is_baby"}
                 ]
               },
               "max_dist": 16
@@ -688,18 +671,18 @@
         }
       },
 
-      "remove_look_for_targets": {
-        "remove": {"component_groups": ["look_for_targets"]},
+      "remove_active_hostility": {
+        "remove": {"component_groups": ["active_hostility"]},
         "queue_command": {
           "command": [
             "tag @s add peaceful",
-            "msg @a[r=40] stops looking for targets now."
+            "msg @a[r=40] stops looking for targets now."   //for debug
           ]
         }
       },
-
       "peaceful": {
-        "trigger": "remove_look_for_targets"
+        "trigger": "remove_active_hostility"
+        //removes targeting, but not self defense capabilities
       },
 
       "add_equipment": {
