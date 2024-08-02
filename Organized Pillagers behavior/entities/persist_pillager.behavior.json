@@ -576,11 +576,6 @@
         "can_jump": true,
         "can_swim": true
       },
-      "minecraft:navigation.swim": {
-        "is_amphibious": false,
-        "can_walk": true,
-        "can_swim": true
-      },
       "minecraft:movement.basic": {
       },
       "minecraft:jump.static": {
