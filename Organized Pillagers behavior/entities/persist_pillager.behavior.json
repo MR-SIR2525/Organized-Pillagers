@@ -663,13 +663,17 @@
             },
             "randomize": [
               {
-                "weight": 95,
+                "weight": 96, //adult
                 "add": {"component_groups": ["minecraft:ranged_attack"]}
               },
               {
-                "weight": 5,
+                "weight": 4,  //baby
                 "trigger": "spawn_as_baby"
               }
+            ],
+            "sequence": [
+              {"trigger": "find_settled_pillagers"},
+              {"trigger": "avoid_players_and_villagers"}
             ]
           }
         ]
@@ -718,7 +722,9 @@
               "test": "has_component", "subject": "other", "value": "minecraft:is_baby"
             },
             "add": {"component_groups": ["baby"]}
-          }
+          },
+          {"trigger": "find_settled_pillagers"},
+          {"trigger": "avoid_players_and_villagers"}
         ]
       },
 
