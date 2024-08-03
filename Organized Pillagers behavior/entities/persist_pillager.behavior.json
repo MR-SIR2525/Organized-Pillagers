@@ -733,6 +733,7 @@
                   }
                 ]
               },
+              {"trigger": "persistence_on"},
               {"trigger": "find_settled_pillagers"},
               {"trigger": "avoid_players_and_villagers"}
             ]
@@ -784,6 +785,7 @@
             },
             "add": {"component_groups": ["baby"]}
           },
+          {"trigger": "persistence_on"},
           {"trigger": "find_settled_pillagers"},
           {"trigger": "avoid_players_and_villagers"}
         ]
