@@ -791,16 +791,6 @@
         ]
       },
 
-      "persistence_on": {
-        "add": {"component_groups": ["persistence"]},
-        "queue_command": {"command": "msg @a[r=1500] §ePersistence on."}  //for debug
-      },
-
-      "persistence_off": {
-        "remove": {"component_groups": ["persistence"]},
-        "queue_command": {"command": "msg @a[r=1500] §ePersistence off."} //for debug
-      },
-
       "find_settled_pillagers": {
         //disarm since going to use attack targeting to control movement
         "trigger": "minecraft:calm",
@@ -960,6 +950,26 @@
         "queue_command": {
           "command": "msg @a[r=40] §eno longer able to breed."   //for debug
         }
+      },
+
+      "persistence_on": {
+        "add": {"component_groups": ["persistence"]},
+        "queue_command": {"command": "msg @a[r=1500] §ePersistence on."}  //for debug
+      },
+
+      "persistence_off": {
+        "remove": {"component_groups": ["persistence"]},
+        "queue_command": {"command": "msg @a[r=1500] §ePersistence off."} //for debug
+      },
+
+      "ticks_world_on": {
+        "add": {"component_groups": ["ticks_world"]},
+        "queue_command": {"command": "msg @a[r=1500] §eTicks world on."}  //for debug
+      },
+
+      "ticks_world_off": {
+        "remove": {"component_groups": ["ticks_world"]},
+        "queue_command": {"command": "msg @a[r=1500] §eTicks world off."}  //for debug
       },
 
       "minecraft:promote_to_illager_captain": {
