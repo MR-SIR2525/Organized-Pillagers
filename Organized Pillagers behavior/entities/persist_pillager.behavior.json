@@ -215,7 +215,7 @@
             }
           ],
           "on_escape_event": {
-            "event": "escaped_players_and_villagers",
+            "event": "escaped_player_or_villager",
             "target": "self"
           }
         },
@@ -817,10 +817,11 @@
       "check_for_nearby_settlements": {
         "queue_command": {
           "command": [
+            "msg @a[r=1500] §eChecking for nearby settlements.",
             // if settled pillagers nearby, move to them
-            "execute as @s at @s if entity @e[family=settled_pillager,r=600] run event entity @s move_to_settled_pillagers",
+            "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s move_to_settled_pillagers",
             // if not settled pillagers nearby, move away from players and villagers
-            "execute as @s at @s unless entity @e[family=settled_pillager,r=600] run event entity @s avoid_players_and_villagers"
+            "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s avoid_players_and_villagers"
           ]
         }
       },
@@ -837,6 +838,7 @@
       "avoid_players_and_villagers": {
         "remove": {"component_groups": ["move_to_settled_pillagers"]},
         "add": {"component_groups": ["avoid_players_and_villagers"]},
+        // - comes with timer to trigger refresh avoid behavior (below)
         "queue_command": {
           "command": "msg @a[r=1500] §eAvoiding players and villagers."   //for debug
         }
@@ -844,8 +846,8 @@
 
       "refresh_avoid_behavior": {
         "queue_command": {"command": [
-          "execute as @s at @s unless entity @e[family=settled_pillager,r=600] run event entity @s avoid_players_and_villagers",
-          "execute as @s at @s if entity @e[family=settled_pillager,r=600] run event entity @s move_to_settled_pillagers"
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s avoid_players_and_villagers",
+          "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s move_to_settled_pillagers"
         ]}
       },
 
@@ -856,52 +858,61 @@
         }
       },
 
-      "escaped_players_and_villagers": {
-        "sequence": [
-          {"queue_command": {"command": "msg @a[r=1500] §eEscaped a player or villager event."}},
-          {
-            "filters": {
-              "test": "has_tag", "subject": "self", "operator": "!=", "value": "trying_to_create_settlement"
-            },
-            "queue_command": {"command": [
-              //verify pillager is away from players/villagers, then remove avoid behavior
-              "execute as @s at @s unless entity @e[type=player,r=260] unless entity @e[type=villager,r=255] run event entity @s stop_avoiding_players_and_villagers"
-            ]}
-          },
-          {
-            "filters": {
-              "test": "has_tag", "subject": "self", "value": "trying_to_create_settlement"
-            },
-            "queue_command": {"command": [
-              //verify pillager is away from players/villagers, move to next step for settlement
-              "execute as @s at @s unless entity @e[type=player,r=260] unless entity @e[type=villager,r=255] run event entity @s find_spot_to_create_settlement"
-            ]}
-          }
-        ]
+      "escaped_player_or_villager": {
+        //Because the refresh avoid behavior event should catch nearby settlements and remove
+        //the avoid behavior. This event assumes no nearby settlements and, if pillager escaped
+        //all players/villagers, we move on to initiating a new settlement.
+        "queue_command": {
+          "command": [
+            "msg @a[r=1500] §eEscaped a player or villager.",
+            //verify pillager is away from players/villagers, move to next step for settlement
+            "execute as @s at @s unless entity @e[r=260,type=player,tag=!pillager_exempt] unless entity @e[r=255,family=villager,tag=!pillager_exempt] run event entity @s find_spot_to_create_settlement"
+          ]
+        }
       },
 
       "find_spot_to_create_settlement": {
         "sequence": [
           {
             "remove": {
-              "component_groups": ["avoid_players_and_villagers" , "shared_timer_for_search_and_avoid"]
+              "component_groups": ["avoid_players_and_villagers", "move_to_settled_pillagers"]
             },
             "queue_command": {
-              "command": "msg @a[r=1500] §eEvent - find spot to create settlement."
-            }
-            //just debug msg, nothing happens for now
+              "command": [
+                "msg @a[r=1500] §eFinding a spot to create a settlement.",
+                "tag @s add trying_to_create_settlement"
+              ]
+            },
+            "trigger": "governor_pillager"
+          },
+          {
+            "filters": {
+              "test": "on_ground", "value": true
+            },
+
           }
         ]
       },
 
+      "governor_pillager": {
+        "add": {"component_groups": ["governor_pillager"]},
+        "queue_command": {"command": "msg @a[r=1500] §eNow a governor pillager."}  //for debug
+      },
+
+      "demote_governor_pillager": {
+        "remove": {"component_groups": ["governor_pillager"]},
+        "trigger": "belongs_to_settlement",
+        "queue_command": {"command": "msg @a[r=1500] §eDemoted from governor."}  //for debug
+      },
+
       "belongs_to_settlement": {
         "add": {"component_groups": ["belongs_to_settlement"]},
-        "queue_command": {"command": "msg @a[r=1500] §ebelongs to settlement."}  //for debug
+        "queue_command": {"command": "msg @a[r=1500] §eBelongs to a settlement."}  //for debug
       },
 
       "remove_belongs_to_settlement": {
         "remove": {"component_groups": ["belongs_to_settlement"]},
-        "queue_command": {"command": "msg @a[r=1500] §eNo longer belongs to settlement."}  //for debug
+        "queue_command": {"command": "msg @a[r=1500] §eNo longer belongs to a settlement."}  //for debug
       },
 
       "target_acquired_during_search": {
@@ -1100,7 +1111,7 @@
       //       }
       //       //--------- muted to test scan interval in avoid_mob behavior
       //       // "queue_command": {
-      //       //   "command": "execute as @s at @s if entity @e[type=player,r=260] if entity @e[type=villager,r=255] run event entity @s avoid_players_and_villagers"
+      //       //   "command": "execute as @s at @s if entity @e[type=player,r=260] if entity @e[family=villager,r=255] run event entity @s avoid_players_and_villagers"
       //       // }
       //     },
 
