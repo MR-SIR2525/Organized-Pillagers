@@ -16,3 +16,7 @@
 **environment sensor**
 - is spamming each tick, checking for difficulty change when melee or ranged_attack mode is active
 - maybe adopt what the bee does...  when pillager has target, check difficulty for appropriate behavior
+
+
+**Docs**
+https://jaylydev.github.io/scriptapi-docs/1.21.23/modules/_minecraft_server_1_13_0.html

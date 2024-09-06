@@ -888,8 +888,8 @@
           {
             "filters": {
               "test": "on_ground", "value": true
-            },
-
+            }
+            //I guess start checking spots?
           }
         ]
       },

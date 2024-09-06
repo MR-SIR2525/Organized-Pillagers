@@ -1,24 +1,39 @@
 {
     "format_version": 2,
     "header": {
-        "name": "Organized Pillagers (behavior) v0.0.105",
+        "name": "Organized Pillagers (behavior) v0.0.106",
         "description": "Dynamic and organized pillager behavior. They will build outposts and bases dynamically as the world progresses, and they will conduct more coordinated raids and attacks where they'll attack but also loot player and villager possessions. By MRxSIR.",
         "uuid": "d484aa26-71ba-4eca-99a8-8becafc28b8f",
         "min_engine_version": [1, 20, 10],
-        "version": [0, 0, 105]
+        "version": [0, 0, 106]
     },
     "modules": [
         {
             "type": "data",
             "description": "behavior pack for Organized Pillagers addon",
             "uuid": "de1dd81c-e012-454a-8a05-cd1200405955",
-            "version": [0, 0, 105]
+            "version": [0, 0, 106]
+        },
+        {
+            "type": "script",
+            "description": "allows script api - pack in development",
+            "uuid": "3e6e164a-a652-4db0-9585-0bf1477365d7",
+            "version": [0, 0, 106],
+            "language": "javascript",
+            "entry": "scripts/main.js"
         }
     ],
     "dependencies": [
         {
             "uuid": "4f2e0be3-b809-4e14-a986-e404dc35b858",
-            "version": [0, 0, 105]
+            "version": [0, 0, 106]
+        },
+        {
+            "module_name": "@minecraft/server",
+            "version": "1.13.0"
         }
-    ]
+    ],
+    "metadata": {
+        "authors": ["MRxSIR"]
+    }
 }
