@@ -865,8 +865,9 @@
         "queue_command": {
           "command": [
             "msg @a[r=1500] §eEscaped a player or villager.",
-            //verify pillager is away from players/villagers, move to next step for settlement
+            //if escaped all players/villagers, look for spot to create new settlement
             "execute as @s at @s unless entity @e[r=260,type=player,tag=!pillager_exempt] unless entity @e[r=255,family=villager,tag=!pillager_exempt] run event entity @s find_spot_to_create_settlement"
+            //else, do nothing (continue avoidance)
           ]
         }
       },
@@ -888,8 +889,11 @@
           {
             "filters": {
               "test": "on_ground", "value": true
+            },
+            //this is where script jumps in
+            "queue_command": {
+              "command": "scriptevent op:find_spot_for_settlement no_message"
             }
-            //I guess start checking spots?
           }
         ]
       },
