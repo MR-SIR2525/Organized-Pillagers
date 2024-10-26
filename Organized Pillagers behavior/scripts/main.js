@@ -13,7 +13,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 
     //what if I use the same id for all p_pillager commands and just change the message?
     if (id === "op:find_spot_for_settlement" && sourceType === "Entity") {
-        find_spot_for_settlement(initiator, sourceBlock, sourceEntity, sourceType);
+        find_spot_for_settlement(sourceEntity);
     }
     else if (id === "op:getFacing") {
         getFacing(sourceEntity);
@@ -21,13 +21,35 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     else if (id === "op:getYRot") {
         world.sendMessage("§b" + sourceEntity.name + " facing " + sourceEntity.getRotation().y.toFixed(2));
     }
+    else if (id === "op:getBlock") {
+        if (message && sourceEntity) {
+            // expecting format: """x y z"""
+            let coords = message.split(" ");
+            let x = Number.parseFloat(coords[0]);
+            let y = Number.parseFloat(coords[1]);
+            let z = Number.parseFloat(coords[2]);
+            const dimension = sourceEntity.dimension;
+
+            world.sendMessage("§bLocation to use: " + x + " " + y + " " + z);
+
+            const block = dimension.getBlock({ x: x, y: y, z: z });
+            if (block) {
+                world.sendMessage("§bBlock is " + block.type.id + " at " + x + " " + y + " " + z);
+            } else {
+                world.sendMessage("§cUnable to get block. Verify coords are correct and in a loaded area.");
+            }
+        }
+        else {
+            world.sendMessage("§cNeed to specify coords to check in 'x y z' format. SourceEntity required.");
+        }
+    }
     else {
         world.sendMessage("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
     }
 });
 
 
-function find_spot_for_settlement(initiator, sourceBlock, sourceEntity, sourceType) {
+function find_spot_for_settlement(sourceEntity) {
     // get name/identifier for printouts
     let name = sourceEntity.name || sourceEntity.typeId;
     
@@ -39,25 +61,25 @@ function find_spot_for_settlement(initiator, sourceBlock, sourceEntity, sourceTy
 
 
     //start checking around self for suitable area
-    const radius = 16;
+    const radius = 10;
     
     // Step 1: Check for "Man-Made" Blocks
     if (containsNoGoBlocks(dimension, x, y, z, radius)) {
         world.sendMessage("§c" + name + " found man-made blocks in the area. Unsuitable for settlement.");
-        return false;
+    }
+    else {
+        world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
     }
 
-    // Step 2: Check Flatness
-    if (!isFlatEnough(dimension, x, y, z, radius)) {
-        world.sendMessage("§c" + name + " found the area too uneven. Unsuitable for settlement.");
-        return false;
-    }
+    // // Step 2: Check Flatness
+    // if (!isFlatEnough(dimension, x, y, z, radius)) {
+    //     world.sendMessage("§c" + name + " found the area too uneven. Unsuitable for settlement.");
+    // }
 
-    // Step 3: Check Forest Density
-    if (!isBelowForestDensity(dimension, x, y, z, radius)) {
-        world.sendMessage("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
-        return false;
-    }
+    // // Step 3: Check Forest Density
+    // if (!isBelowForestDensity(dimension, x, y, z, radius)) {
+    //     world.sendMessage("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
+    // }
 }
 
 
@@ -81,7 +103,7 @@ function containsNoGoBlocks(dimension, x, y, z, radius) {
     for (let dx = -radius; dx <= radius; dx++) {
         for (let dz = -radius; dz <= radius; dz++) {
             const block = dimension.getBlock({ x: x + dx, y: y, z: z + dz });
-            if (noGoBlocks.includes(block.id)) {
+            if (noGoBlocks.includes(block.type.id)) {
                 return true;  // No-go block found
             }
         }
