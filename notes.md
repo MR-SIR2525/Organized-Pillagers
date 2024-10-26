@@ -12,6 +12,14 @@
 
 **Finding spot to create settlements**
 - Basically just identify flat ish area... then clear out trees if needed, then build a town center first? Maybe vanilla tower near the center?
+- Algorithm pretty good for detecting man-made blocks
+
+-----------------------------
+TODO:
+- Do flatness check
+- Do forest density check
+
+-----------------------------
 
 **environment sensor**
 - is spamming each tick, checking for difficulty change when melee or ranged_attack mode is active
