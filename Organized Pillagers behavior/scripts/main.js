@@ -62,9 +62,11 @@ function find_spot_for_settlement(sourceEntity) {
 
     //start checking around self for suitable area
     const radius = 10;
+    const height = 10;
+    const depth = 5;
     
     // Step 1: Check for "Man-Made" Blocks
-    if (containsNoGoBlocks(dimension, x, y, z, radius)) {
+    if (containsNoGoBlocks(dimension, x, y, z, radius, height, depth)) {
         world.sendMessage("§c" + name + " found man-made blocks in the area. Unsuitable for settlement.");
     }
     else {
@@ -83,31 +85,78 @@ function find_spot_for_settlement(sourceEntity) {
 }
 
 
-function containsNoGoBlocks(dimension, x, y, z, radius) {
+function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
+    // There's gotta be a way to use block types, i.e. "planks" for any type of wood planks... idk.
     const noGoBlocks = [
+        // Planks
         "minecraft:acacia_planks", "minecraft:bamboo", "minecraft:birch_planks", "minecraft:crimson_planks",
         "minecraft:dark_oak_planks", "minecraft:jungle_planks", "minecraft:oak_planks", "minecraft:spruce_planks",
-        "minecraft:warped_planks", "minecraft:cobblestone", "minecraft:mossy_cobblestone", "minecraft:stonebrick",
-        "minecraft:smooth_stone", "minecraft:deepslate", "minecraft:cobbled_deepslate", "minecraft:glass",
-        "minecraft:glass_pane", "minecraft:stained_glass", "minecraft:stained_glass_pane", "minecraft:tinted_glass",
-        "minecraft:hard_glass", "minecraft:hard_glass_pane", "minecraft:wooden_door", "minecraft:iron_door",
-        "minecraft:bamboo_door", "minecraft:copper_door", "minecraft:chest", "minecraft:ender_chest",
-        "shulker_box", "barrel", "minecraft:bed", "minecraft:crafting_table",
-        "minecraft:anvil", "minecraft:composter", "mrsir:farmer_guide_stone", "minecraft:furnace",
-        "minecraft:blast_furnace", "minecraft:smoker", "minecraft:grindstone", "minecraft:lectern",
-        "minecraft:cauldron", "minecraft:brewing_stand", "minecraft:smithing_table", "minecraft:cartography_table",
-        "minecraft:loom", "minecraft:stonecutter", "minecraft:stonecutter_block", "minecraft:enchanting_table",
-        "minecraft:beacon", "minecraft:obsidian", "minecraft:iron_block", "minecraft:gold_block"
+        "minecraft:warped_planks",
+
+        // Stone Variants
+        "minecraft:cobblestone", "minecraft:cobbled_deepslate", "minecraft:deepslate", "minecraft:mossy_cobblestone",
+        "minecraft:smooth_stone", "minecraft:stonebrick",
+
+        // Glass Types
+        "minecraft:glass", "minecraft:glass_pane", "minecraft:stained_glass", "minecraft:stained_glass_pane",
+        "minecraft:tinted_glass",
+
+        // Wooden Doors
+        "minecraft:acacia_door", "minecraft:bamboo_door", "minecraft:birch_door", "minecraft:crimson_door",
+        "minecraft:dark_oak_door", "minecraft:jungle_door", "minecraft:oak_door", "minecraft:spruce_door",
+        "minecraft:warped_door",
+
+        // Non-Wooden Doors
+        "minecraft:copper_door", "minecraft:iron_door",
+
+        // Storage
+        "minecraft:barrel", "minecraft:chest", "minecraft:ender_chest", "minecraft:shulker_box",
+
+        // Special Blocks
+        "minecraft:anvil", "minecraft:bed", "minecraft:blast_furnace", "minecraft:brewing_stand",
+        "minecraft:cartography_table", "minecraft:cauldron", "minecraft:composter", "minecraft:crafting_table",
+        "minecraft:enchanting_table", "minecraft:furnace", "minecraft:grindstone", "minecraft:hopper",
+        "minecraft:lectern", "minecraft:loom", "minecraft:smithing_table", "minecraft:smoker", "minecraft:stonecutter_block",
+
+        // Other Blocks
+        "minecraft:beacon", "minecraft:gold_block", "minecraft:iron_block", "minecraft:obsidian",
+
+        // Fences
+        "minecraft:acacia_fence", "minecraft:bamboo_fence", "minecraft:birch_fence", "minecraft:crimson_fence",
+        "minecraft:dark_oak_fence", "minecraft:jungle_fence", "minecraft:oak_fence", "minecraft:spruce_fence",
+        "minecraft:warped_fence",
+
+        // Walls
+        "minecraft:andesite_wall", "minecraft:brick_wall", "minecraft:cobbled_deepslate_wall",
+        "minecraft:cobblestone_wall", "minecraft:deepslate_brick_wall", "minecraft:deepslate_tile_wall", 
+        "minecraft:diorite_wall", "minecraft:end_stone_brick_wall",
+        "minecraft:mud_brick_wall", "minecraft:nether_brick_wall", "minecraft:prismarine_wall", 
+        "minecraft:red_sandstone_wall", "minecraft:sandstone_wall", "minecraft:stone_brick_wall"
     ];
+
+    const noGoBlocks_custom = [
+        "mrsir:farmer_guide_stone"
+    ]
     
-    for (let dx = -radius; dx <= radius; dx++) {
-        for (let dz = -radius; dz <= radius; dz++) {
-            const block = dimension.getBlock({ x: x + dx, y: y, z: z + dz });
-            if (noGoBlocks.includes(block.type.id)) {
-                return true;  // No-go block found
+    // Iterate through each elevation level within the height and depth range
+    for (let dy = -depth; dy <= height; dy++) {
+        const currentY = y + dy;
+
+        // Iterate through the area within the radius on the X and Z axes
+        for (let dx = -radius; dx <= radius; dx++) {
+            for (let dz = -radius; dz <= radius; dz++) {
+                const block = dimension.getBlock({ x: x + dx, y: currentY, z: z + dz });
+                
+                // Check if the block is in the no-go list
+                if (block && (noGoBlocks.includes(block.type.id) 
+                    || noGoBlocks_custom.includes(block.type.id))) {
+                    return true;  // No-go block found in this slice
+                }
             }
         }
     }
+
+    // If no no-go block was found in any slice
     return false;
 }
 
