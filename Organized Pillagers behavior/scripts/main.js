@@ -51,7 +51,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 
 function find_spot_for_settlement(sourceEntity) {
     // get name/identifier for printouts
-    let name = sourceEntity.name || sourceEntity.typeId;
+    const name = sourceEntity.name || sourceEntity.typeId;
     
     // get location of sourceEntity
     let x = sourceEntity.location.x;
