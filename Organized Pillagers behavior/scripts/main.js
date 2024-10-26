@@ -98,6 +98,23 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
         "minecraft:cobblestone", "minecraft:cobbled_deepslate", "minecraft:smooth_stone", 
         "minecraft:stonebrick",
 
+        // Concrete
+        // white, orange, magenta, light_blue, yellow, lime, pink, gray, light_gray, cyan, purple, blue, brown, green, red, black
+        "minecraft:white_concrete", "minecraft:orange_concrete", "minecraft:magenta_concrete", 
+        "minecraft:light_blue_concrete", "minecraft:yellow_concrete", "minecraft:lime_concrete", 
+        "minecraft:pink_concrete", "minecraft:gray_concrete", "minecraft:light_gray_concrete",
+        "minecraft:cyan_concrete", "minecraft:purple_concrete", "minecraft:blue_concrete", 
+        "minecraft:brown_concrete", "minecraft:green_concrete", "minecraft:red_concrete", 
+        "minecraft:black_concrete",
+
+        // Concrete powders
+        "minecraft:white_concrete_powder", "minecraft:orange_concrete_powder", "minecraft:magenta_concrete_powder",
+        "minecraft:light_blue_concrete", "minecraft:yellow_concrete_powder", "minecraft:lime_concrete_powder",
+        "minecraft:pink_concrete_powder", "minecraft:gray_concrete_powder", "minecraft:light_gray_concrete",
+        "minecraft:cyan_concrete_powder", "minecraft:purple_concrete_powder", "minecraft:blue_concrete_powder",
+        "minecraft:brown_concrete_powder", "minecraft:green_concrete_powder", "minecraft:red_concrete_powder",
+        "minecraft:black_concrete_powder",
+
         // Glass Types
         "minecraft:glass", "minecraft:glass_pane", "minecraft:stained_glass", "minecraft:stained_glass_pane",
         "minecraft:tinted_glass",
@@ -137,6 +154,9 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     // Iterate through each elevation level within the height and depth range
     for (let dy = -depth; dy <= height; dy++) {
         const currentY = y + dy;
+
+        // Step size for scanning (can be adjusted for performance)
+        const stepSize = 2;     //check every n blocks
 
         // Iterate through the area within the radius on the X and Z axes
         for (let dx = -radius; dx <= radius; dx += stepSize) {
