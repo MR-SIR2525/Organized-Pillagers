@@ -156,6 +156,7 @@
 
       //using attack targeting to make our pillager move to settlement
       "move_to_settled_pillagers": {
+        //********** Might need to use this \/  \/ ***********
         // "minecraft:behavior.move_towards_target": {
         //   "priority": 2,
         //   "within_radius": 20

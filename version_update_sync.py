@@ -77,12 +77,12 @@ def main():
     print("Searching for behavior pack folder in operating directory...")
     behavior_folders = find_folders(base_dir, behavior_keywords)
     if behavior_folders.__len__() > 1:
-        print("Warning:  Multiple behavior pack folders found. There should only be one per addon. Are you in a folder with multiple behavior packs?")
+        print("Warning:  Multiple behavior pack folders found. Are you in a folder with multiple behavior packs?")
     
     print("Searching for resource pack folder in operating directory...")
     resource_folders = find_folders(base_dir, resource_keywords)
     if resource_folders.__len__() > 1:
-        print("Warning:  Multiple resource pack folders found. There should only be one per addon. Are you in a folder with multiple resource packs?")
+        print("Warning:  Multiple resource pack folders found. Are you in a folder with multiple resource packs?")
 
     all_folders = behavior_folders + resource_folders
     manifest_files = find_manifest_files(all_folders)
