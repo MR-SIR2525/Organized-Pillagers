@@ -87,15 +87,16 @@ function find_spot_for_settlement(sourceEntity) {
 
 function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     // There's gotta be a way to use block types, i.e. "planks" for any type of wood planks... idk.
-    const noGoBlocks = [
+    // Set.has is O(1) on average (hashtable), compared to O(n) for Array.includes
+    const noGoBlocks = new Set([
         // Planks
-        "minecraft:acacia_planks", "minecraft:bamboo", "minecraft:birch_planks", "minecraft:crimson_planks",
+        "minecraft:acacia_planks", "minecraft:bamboo_planks", "minecraft:birch_planks", "minecraft:crimson_planks",
         "minecraft:dark_oak_planks", "minecraft:jungle_planks", "minecraft:oak_planks", "minecraft:spruce_planks",
         "minecraft:warped_planks",
 
         // Stone Variants
-        "minecraft:cobblestone", "minecraft:cobbled_deepslate", "minecraft:deepslate", "minecraft:mossy_cobblestone",
-        "minecraft:smooth_stone", "minecraft:stonebrick",
+        "minecraft:cobblestone", "minecraft:cobbled_deepslate", "minecraft:smooth_stone", 
+        "minecraft:stonebrick",
 
         // Glass Types
         "minecraft:glass", "minecraft:glass_pane", "minecraft:stained_glass", "minecraft:stained_glass_pane",
@@ -129,27 +130,21 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
         // Walls
         "minecraft:andesite_wall", "minecraft:brick_wall", "minecraft:cobbled_deepslate_wall",
         "minecraft:cobblestone_wall", "minecraft:deepslate_brick_wall", "minecraft:deepslate_tile_wall", 
-        "minecraft:diorite_wall", "minecraft:end_stone_brick_wall",
-        "minecraft:mud_brick_wall", "minecraft:nether_brick_wall", "minecraft:prismarine_wall", 
-        "minecraft:red_sandstone_wall", "minecraft:sandstone_wall", "minecraft:stone_brick_wall"
-    ];
-
-    const noGoBlocks_custom = [
-        "mrsir:farmer_guide_stone"
-    ]
+        "minecraft:diorite_wall", "minecraft:end_stone_brick_wall", "minecraft:mud_brick_wall", 
+        "minecraft:nether_brick_wall", "minecraft:sandstone_wall", "minecraft:stone_brick_wall"
+    ]);
     
     // Iterate through each elevation level within the height and depth range
     for (let dy = -depth; dy <= height; dy++) {
         const currentY = y + dy;
 
         // Iterate through the area within the radius on the X and Z axes
-        for (let dx = -radius; dx <= radius; dx++) {
-            for (let dz = -radius; dz <= radius; dz++) {
+        for (let dx = -radius; dx <= radius; dx += stepSize) {
+            for (let dz = -radius; dz <= radius; dz += stepSize) {
                 const block = dimension.getBlock({ x: x + dx, y: currentY, z: z + dz });
-                
+
                 // Check if the block is in the no-go list
-                if (block && (noGoBlocks.includes(block.type.id) 
-                    || noGoBlocks_custom.includes(block.type.id))) {
+                if (block && noGoBlocks.has(block.type.id)) {
                     return true;  // No-go block found in this slice
                 }
             }
