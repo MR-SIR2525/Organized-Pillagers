@@ -61,9 +61,9 @@ function find_spot_for_settlement(sourceEntity) {
 
 
     //start checking around self for suitable area
-    const radius = 10;
+    const radius = 48;
     const height = 10;
-    const depth = 5;
+    const depth = 6;
     
     // Step 1: Check for "Man-Made" Blocks
     if (containsNoGoBlocks(dimension, x, y, z, radius, height, depth)) {
@@ -143,6 +143,7 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
 
         // Other Blocks
         "minecraft:beacon", "minecraft:gold_block", "minecraft:iron_block", "minecraft:obsidian",
+        "end_portal_frame",
 
         // Fences
         "minecraft:acacia_fence", "minecraft:bamboo_fence", "minecraft:birch_fence", "minecraft:crimson_fence",
