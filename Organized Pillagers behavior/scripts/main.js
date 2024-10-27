@@ -43,6 +43,30 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             world.sendMessage("§cNeed to specify coords to check in 'x y z' format. SourceEntity required.");
         }
     }
+    else if (id === "op:isFlatEnough") {
+        if (message && sourceEntity) {
+            // Parse X, Y, Z coordinates
+            let coords = message.split(" ");
+
+            let x = (coords[0] === "~") ? Math.round(sourceEntity.location.x) : Number.parseFloat(coords[0]);
+            let y = (coords[1] === "~") ? Math.round(sourceEntity.location.y) : Number.parseFloat(coords[1]);
+            let z = (coords[2] === "~") ? Math.round(sourceEntity.location.z) : Number.parseFloat(coords[2]);
+
+            let radius = Number.parseFloat(coords[3]);
+            let threshold = Number.parseFloat(coords[4]);
+            let successPercentage = Number.parseFloat(coords[5]);
+
+            if (isFlatEnough(sourceEntity.dimension, x, y, z, radius, threshold, successPercentage)) {
+                world.sendMessage("§aThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is flat enough.");
+            }
+            else {
+                world.sendMessage("§cThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is not flat enough.");
+            }
+            world.sendMessage("radius = " + radius);
+            world.sendMessage("threshold = " + threshold);
+            world.sendMessage("successPercentage = " + successPercentage);
+        }
+    }
     else {
         world.sendMessage("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
     }
