@@ -87,22 +87,39 @@ function find_spot_for_settlement(sourceEntity) {
     const depth = 6;
     
     // Step 1: Check for "Man-Made" Blocks
-    if (containsNoGoBlocks(dimension, x, y, z, radius, height, depth)) {
+    const fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
+    if (fContainsNoGoBlocks) {
         world.sendMessage("§c" + name + " found man-made blocks in the area. Unsuitable for settlement.");
     }
     else {
         world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
+        world.sendMessage("Ready to check flatness...");
+
+        let tickDelay = 40;
+        system.runTimeout(() => {
+            // Step 2: Check Flatness
+            // -1 for any of these will use default values
+            const flatnessRadius = 20;
+            const threshold = -1;
+            const successPercentage = 0.75;
+
+            const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
+            if (!fIsFlatEnough) {
+                world.sendMessage("§cArea is not flat enough. Unsuitable for settlement.");
+            }
+            else {
+                world.sendMessage("§aArea is flat enough. Suitable for settlement.");
+                // Step 3: Check Forest Density
+                // if (!isBelowForestDensity(dimension, x, y, z, radius)) {
+                //     world.sendMessage("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
+                // }
+
+                world.sendMessage("- Note: Forest density not check implemented yet.");
+            }
+        }, tickDelay);
     }
+        
 
-    // // Step 2: Check Flatness
-    // if (!isFlatEnough(dimension, x, y, z, radius)) {
-    //     world.sendMessage("§c" + name + " found the area too uneven. Unsuitable for settlement.");
-    // }
-
-    // // Step 3: Check Forest Density
-    // if (!isBelowForestDensity(dimension, x, y, z, radius)) {
-    //     world.sendMessage("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
-    // }
 }
 
 
@@ -268,8 +285,8 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
     const deepDropRatio = deepDropsCount / totalBlockCount;
     const flatnessRatio = flatBlockCount / totalBlockCount;
 
-    world.sendMessage("§eDeep drop ratio = " + deepDropRatio.toFixed(2));
-    world.sendMessage("§eFlatness ratio = " + flatnessRatio.toFixed(2));
+    world.sendMessage("Deep drop ratio = " + deepDropRatio.toFixed(2));
+    world.sendMessage("Flatness ratio = " + flatnessRatio.toFixed(2));
 
     // if any of these fail, return false
     return deepDropRatio < (1 - successPercentage) 
