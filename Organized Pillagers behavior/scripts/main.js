@@ -181,21 +181,49 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     return false;
 }
 
-function isFlatEnough(dimension, x, y, z, radius) {
+function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) {
+    // Default values
+    if (radius === -1) {
+        radius = 16;
+    }
+    if (threshold === -1) {
+        threshold = 3; // Flatness threshold per step
+    }
+    if (successPercentage === -1) {
+        successPercentage = 0.70; // Success percentage threshold
+    }
+
     let minY = y;
     let maxY = y;
+    let flatBlockCount = 0;
+    let totalBlockCount = 0;
 
     for (let dx = -radius; dx <= radius; dx++) {
         for (let dz = -radius; dz <= radius; dz++) {
             const currentBlock = dimension.getBlock({ x: x + dx, y: y, z: z + dz });
+
+            // Skip air blocks to only consider solid blocks
+            if (currentBlock.type.id === "minecraft:air") {
+                continue;
+            }
+
             const blockY = currentBlock.location.y;
             minY = Math.min(minY, blockY);
             maxY = Math.max(maxY, blockY);
+
+            // Count "flat" blocks based on neighboring differences
+            totalBlockCount++;
+            if (Math.abs(blockY - y) <= threshold) {
+                flatBlockCount++;
+            }
         }
     }
 
-    return (maxY - minY) <= 3;  // Example threshold of 3 blocks for "flatness"
+    // Return true if a high enough proportion of blocks meet the flatness criteria
+    const flatnessRatio = flatBlockCount / totalBlockCount;
+    return (maxY - minY) <= 3 && flatnessRatio > successPercentage; // Adjust ratio as needed
 }
+
 
 function isBelowForestDensity(dimension, x, y, z, radius) {
     const treeBlocks = ["minecraft:log", "minecraft:leaves", /* other tree blocks */];
