@@ -207,47 +207,70 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
 
 function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) {
     // Default values
-    if (radius === -1) {
-        radius = 16;
-    }
-    if (threshold === -1) {
-        threshold = 3; // Flatness threshold per step
-    }
-    if (successPercentage === -1) {
-        successPercentage = 0.70; // Success percentage threshold
-    }
+    if (radius === -1) radius = 16;
+    if (threshold === -1) threshold = 10;
+    if (successPercentage === -1) successPercentage = 0.70;
 
     let minY = y;
     let maxY = y;
+    let steepBlockCount = 0;
     let flatBlockCount = 0;
     let totalBlockCount = 0;
+    let deepDropsCount = 0;
 
-    for (let dx = -radius; dx <= radius; dx++) {
-        for (let dz = -radius; dz <= radius; dz++) {
-            const currentBlock = dimension.getBlock({ x: x + dx, y: y, z: z + dz });
+    // Scan horizontally every stepSize blocks
+    let stepSize = 2;
+    for (let dx = -radius; dx <= radius; dx += stepSize) {
+        for (let dz = -radius; dz <= radius; dz += stepSize) {
+            // Start at y + 1
+            let currentY = y + 1;
+            let foundSolidBlock = false;
 
-            // Skip air blocks to only consider solid blocks
-            if (currentBlock.type.id === "minecraft:air") {
-                continue;
+            // Scan downward until a non-air block is found or until threshold is reached
+            for (let depth = 0; depth <= threshold; depth++) {
+                const currentBlock = dimension.getBlock({ x: x + dx, y: currentY - depth, z: z + dz });
+
+                if (currentBlock && currentBlock.type.id !== "minecraft:air") {
+                    const blockY = currentBlock.location.y;
+                    minY = Math.min(minY, blockY);
+                    maxY = Math.max(maxY, blockY);
+
+                    // Count this block as a "flat" block if it meets the flatness threshold
+                    totalBlockCount++;
+                    if (Math.abs(blockY - y) <= threshold) {
+                        flatBlockCount++;
+                    } else {
+                        // If the elevation difference is too steep, count it as a steep block
+                        steepBlockCount++;
+                    }
+
+                    foundSolidBlock = true;
+                    break; // Exit the downward scanning once a solid block is found
+                }
             }
 
-            const blockY = currentBlock.location.y;
-            minY = Math.min(minY, blockY);
-            maxY = Math.max(maxY, blockY);
-
-            // Count "flat" blocks based on neighboring differences
-            totalBlockCount++;
-            if (Math.abs(blockY - y) <= threshold) {
-                flatBlockCount++;
+            // If no solid block was found within the threshold, mark it as a deep drop-off
+            if (!foundSolidBlock) {
+                deepDropsCount++;
             }
         }
     }
 
-    // Return true if a high enough proportion of blocks meet the flatness criteria
-    const flatnessRatio = flatBlockCount / totalBlockCount;
-    return (maxY - minY) <= 3 && flatnessRatio > successPercentage; // Adjust ratio as needed
-}
+    // Fail the check if too many deep drops were found
+    const deepDropRatio = deepDropsCount / totalBlockCount;
+    if (deepDropRatio > (1 - successPercentage)) {
+        return false;
+    }
 
+    // Calculate the flatness ratio
+    const flatnessRatio = flatBlockCount / totalBlockCount;
+    const steepnessRatio = steepBlockCount / totalBlockCount;
+
+    // Ensure that the flatness ratio is within the acceptable successPercentage
+    // and that the area doesn't have too many steep blocks
+    return flatnessRatio >= successPercentage && steepnessRatio < (1 - successPercentage);
+}
+    
 
 function isBelowForestDensity(dimension, x, y, z, radius) {
     const treeBlocks = ["minecraft:log", "minecraft:leaves", /* other tree blocks */];
