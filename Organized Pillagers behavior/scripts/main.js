@@ -95,7 +95,7 @@ function find_spot_for_settlement(sourceEntity) {
         world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
         world.sendMessage("Ready to check flatness...");
 
-        let tickDelay = 40;
+        let tickDelay = 20;
         system.runTimeout(() => {
             // Step 2: Check Flatness
             // -1 for any of these will use default values
