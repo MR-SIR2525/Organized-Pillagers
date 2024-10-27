@@ -203,10 +203,25 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
 }
 
 function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) {
-    // Default values
-    if (radius === -1) radius = 16;
-    if (threshold === -1) threshold = 10;
-    if (successPercentage === -1) successPercentage = 0.70;
+    // Default values and input validation
+    if (radius < 1) 
+        radius = 16;
+    if (threshold < 1) {
+        if (threshold === -1) 
+            threshold = 10;
+        else {
+            threshold = 1;
+            world.sendMessage("§cError: Invalid threshold " + threshold + ". Using 1 instead.");
+        }
+    }
+    if (successPercentage < 0.0 || successPercentage > 1.0) {
+        if (successPercentage === -1) 
+            successPercentage = 0.70;
+        else {
+            successPercentage = 0.70;
+            world.sendMessage("§cError: Invalid successPercentage " + successPercentage + ". Using 0.70 instead.");
+        }
+    }
 
     // for debug
     world.sendMessage("radius = " + radius);
