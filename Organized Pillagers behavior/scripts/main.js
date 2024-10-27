@@ -213,7 +213,6 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
     world.sendMessage("threshold = " + threshold);
     world.sendMessage("successPercentage = " + successPercentage);
 
-    let steepBlockCount = 0;
     let flatBlockCount = 0;
     let totalBlockCount = 0;
     let deepDropsCount = 0;
@@ -237,9 +236,6 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
                     totalBlockCount++;
                     if (Math.abs(blockY - y) <= threshold) {
                         flatBlockCount++;
-                    } else {
-                        // If the elevation difference is too steep, count it as a steep block
-                        steepBlockCount++;
                     }
 
                     foundSolidBlock = true;
@@ -256,11 +252,9 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
 
     const deepDropRatio = deepDropsCount / totalBlockCount;
     const flatnessRatio = flatBlockCount / totalBlockCount;
-    // const steepnessRatio = steepBlockCount / totalBlockCount;
 
     world.sendMessage("§eDeep drop ratio = " + deepDropRatio.toFixed(2));
     world.sendMessage("§eFlatness ratio = " + flatnessRatio.toFixed(2));
-    // world.sendMessage("§eSteepness ratio = " + steepnessRatio.toFixed(2));
 
     // if any of these fail, return false
     return deepDropRatio < (1 - successPercentage) 
