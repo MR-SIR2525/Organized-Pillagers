@@ -62,9 +62,6 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             else {
                 world.sendMessage("§cThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is not flat enough.");
             }
-            world.sendMessage("radius = " + radius);
-            world.sendMessage("threshold = " + threshold);
-            world.sendMessage("successPercentage = " + successPercentage);
         }
     }
     else {
@@ -211,8 +208,11 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
     if (threshold === -1) threshold = 10;
     if (successPercentage === -1) successPercentage = 0.70;
 
-    let minY = y;
-    let maxY = y;
+    // for debug
+    world.sendMessage("radius = " + radius);
+    world.sendMessage("threshold = " + threshold);
+    world.sendMessage("successPercentage = " + successPercentage);
+
     let steepBlockCount = 0;
     let flatBlockCount = 0;
     let totalBlockCount = 0;
@@ -232,8 +232,6 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
 
                 if (currentBlock && currentBlock.type.id !== "minecraft:air") {
                     const blockY = currentBlock.location.y;
-                    minY = Math.min(minY, blockY);
-                    maxY = Math.max(maxY, blockY);
 
                     // Count this block as a "flat" block if it meets the flatness threshold
                     totalBlockCount++;
@@ -256,19 +254,17 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
         }
     }
 
-    // Fail the check if too many deep drops were found
     const deepDropRatio = deepDropsCount / totalBlockCount;
-    if (deepDropRatio > (1 - successPercentage)) {
-        return false;
-    }
-
-    // Calculate the flatness ratio
     const flatnessRatio = flatBlockCount / totalBlockCount;
-    const steepnessRatio = steepBlockCount / totalBlockCount;
+    // const steepnessRatio = steepBlockCount / totalBlockCount;
 
-    // Ensure that the flatness ratio is within the acceptable successPercentage
-    // and that the area doesn't have too many steep blocks
-    return flatnessRatio >= successPercentage && steepnessRatio < (1 - successPercentage);
+    world.sendMessage("§eDeep drop ratio = " + deepDropRatio.toFixed(2));
+    world.sendMessage("§eFlatness ratio = " + flatnessRatio.toFixed(2));
+    // world.sendMessage("§eSteepness ratio = " + steepnessRatio.toFixed(2));
+
+    // if any of these fail, return false
+    return deepDropRatio < (1 - successPercentage) 
+        && flatnessRatio >= successPercentage;
 }
     
 
