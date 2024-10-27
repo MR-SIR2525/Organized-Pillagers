@@ -75,10 +75,10 @@ function find_spot_for_settlement(sourceEntity) {
     const name = sourceEntity.name || sourceEntity.typeId;
     
     // get location of sourceEntity
-    let x = sourceEntity.location.x;
-    let y = sourceEntity.location.y;
-    let z = sourceEntity.location.z;
-    let dimension = sourceEntity.dimension;
+    const x = sourceEntity.location.x;
+    const y = sourceEntity.location.y;
+    const z = sourceEntity.location.z;
+    const dimension = sourceEntity.dimension;
 
 
     //start checking around self for suitable area
