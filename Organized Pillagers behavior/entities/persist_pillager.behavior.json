@@ -171,6 +171,31 @@
         }
       },
 
+      "random_stroll": {
+        "minecraft:behavior.random_stroll": {
+          "priority": 4,
+          "interval": 200,
+          "xz_dist": 40,
+          "y_dist": 7
+        }
+      },
+
+      "move_to_random_block": {
+        "minecraft:behavior.move_to_random_block": {
+          "priority": 4,
+          "block_distance": 40,
+          "within_radius": 4
+        },
+        "minecraft:timer": {
+          "time": 15,
+          "looping": false,
+          "time_down_event": {
+            "event": "timeout_move_to_random_block",
+            "target": "self"
+          }
+        }
+      },
+
       //using attack targeting to make our pillager move to settlement
       "move_to_settled_pillagers": {
         //********** Might need to use this \/  \/ ***********
@@ -864,7 +889,14 @@
 
       "refresh_avoid_behavior": {
         "queue_command": {"command": [
-          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s avoid_players_and_villagers",
+          "msg @a[r=1500] §eRefresh avoid behavior event.",
+          // don't run if settled pillagers or players in range
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] unless entity @e[family=player,family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
+          
+          // don't run if settled pillagers in range
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s escaped_player_or_villager",
+
+          // run if settled pillagers in range
           "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s move_to_settled_pillagers"
         ]}
       },
@@ -910,11 +942,50 @@
             },
             //this is where script jumps in
             "queue_command": {
-              "command": "scriptevent op:find_spot_for_settlement no_message"
+              "command": "scriptevent op:find_spot_for_settlement ..."
             }
           }
         ]
       },
+
+      // Script: checking for suitable spot failed, need to move to new location
+      "found_man_made_blocks": {
+        "queue_command": {"command": "msg @a[r=1500] §ejson...   Found man made blocks."},
+        "trigger": "random_stroll"
+      },
+
+      "move_to_random_block": {
+        "add": {"component_groups": ["move_to_random_block"]},
+        "queue_command": {"command": "msg @a[r=1500] §eMoving to random block."}  //for debug
+      },
+
+      "random_stroll": {
+        "add": {"component_groups": ["random_stroll"]},
+        "queue_command": {"command": "msg @a[r=1500] §eRandom stroll."}  //for debug
+      },
+
+      "stop_move_to_random_block": {
+        "remove": {"component_groups": ["move_to_random_block"]},
+        "queue_command": {"command": "msg @a[r=1500] §eNo longer moving to random block."}  //for debug
+      },
+
+      "stop_random_stroll": {
+        "remove": {"component_groups": ["random_stroll"]},
+        "queue_command": {"command": "msg @a[r=1500] §eNo longer random stroll."}  //for debug
+      },
+
+      "timeout_random_stroll": {
+        "remove": {"component_groups": ["random_stroll"]},
+        "trigger": "find_spot_to_create_settlement",
+        "queue_command": {"command": "msg @a[r=1500] §eTimed out random stroll."}  //for debug
+      },
+
+      "stop_timeout_random_stroll": {
+        "remove": {"component_groups": ["random_stroll"]},
+        "trigger": "find_spot_to_create_settlement",
+        "queue_command": {"command": "msg @a[r=1500] §eTimed out random stroll."}  //for debug
+      },
+      // --------- end of script stuff ^
 
       "governor_pillager": {
         "add": {"component_groups": ["governor_pillager"]},
