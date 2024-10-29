@@ -225,7 +225,8 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     return false;
 }
 
-function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) {
+
+function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercentage=0.70) {
     // Default values and input validation
     if (radius < 1) 
         radius = 16;
@@ -267,6 +268,7 @@ function isFlatEnough(dimension, x, y, z, radius, threshold, successPercentage) 
             for (let depth = 0; depth <= threshold; depth++) {
                 const currentBlock = dimension.getBlock({ x: x + dx, y: currentY - depth, z: z + dz });
 
+                // maybe consider adding && ... != "minecraft:water"?
                 if (currentBlock && currentBlock.type.id !== "minecraft:air") {
                     const blockY = currentBlock.location.y;
 
