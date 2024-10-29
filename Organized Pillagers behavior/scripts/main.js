@@ -194,6 +194,12 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
         "minecraft:diorite_wall", "minecraft:end_stone_brick_wall", "minecraft:mud_brick_wall", 
         "minecraft:nether_brick_wall", "minecraft:sandstone_wall", "minecraft:stone_brick_wall"
     ]);
+
+    // for debug
+    world.sendMessage("checking for manmade blocks around " + x.toFixed(2) + " " + y.toFixed(2) + " " + z.toFixed(2) + " using values");
+    world.sendMessage("radius: " + radius);
+    world.sendMessage("height: " + height);
+    world.sendMessage("depth: " + depth);
     
     // Iterate through each elevation level within the height and depth range
     for (let dy = -depth; dy <= height; dy++) {
