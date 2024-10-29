@@ -154,6 +154,23 @@
         }
       },
 
+      "move_to_land": {
+        "minecraft:behavior.move_to_land": {
+          "goal_radius": 0.5,
+          "search_height": 5,
+          "search_range": 32,
+          "search_count": 10
+        },
+        "minecraft:timer": {
+          "time": 15,
+          "looping": true,
+          "time_down_event": {
+            "event": "timeout_move_to_land",
+            "target": "self"
+          }
+        }
+      },
+
       //using attack targeting to make our pillager move to settlement
       "move_to_settled_pillagers": {
         //********** Might need to use this \/  \/ ***********
