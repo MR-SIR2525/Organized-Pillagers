@@ -105,6 +105,10 @@ function find_spot_for_settlement(sourceEntity) {
     const fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
     if (fContainsNoGoBlocks) {
         world.sendMessage("§c" + name + " found man-made blocks in the area. Unsuitable for settlement.");
+
+        // sourceEntity.runCommandAsync("event entity @s .....");
+        sourceEntity.triggerEvent("found_man_made_blocks");
+        
     }
     else {
         world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
@@ -217,7 +221,7 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     world.sendMessage("depth: " + depth);
     
     // Iterate through each elevation level within the height and depth range
-    for (let dy = -depth; dy <= height; dy++) {
+    for (let dy = height; dy >= -depth; dy--) {
         const currentY = y + dy;
 
         // Step size for scanning (can be adjusted for performance)
