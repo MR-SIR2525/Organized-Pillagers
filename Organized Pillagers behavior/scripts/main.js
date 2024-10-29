@@ -220,7 +220,7 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     world.sendMessage("height: " + height);
     world.sendMessage("depth: " + depth);
     
-    // Iterate through each elevation level within the height and depth range
+    // Iterate top-down through each elevation level within the height and depth range
     for (let dy = height; dy >= -depth; dy--) {
         const currentY = y + dy;
 
