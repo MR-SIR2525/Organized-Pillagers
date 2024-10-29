@@ -99,8 +99,8 @@ function find_spot_for_settlement(sourceEntity) {
         system.runTimeout(() => {
             // Step 2: Check Flatness
             // -1 for any of these will use default values
-            const flatnessRadius = 20;
-            const threshold = -1;
+            const flatnessRadius = 25;
+            const threshold = 10;
             const successPercentage = 0.75;
 
             const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
