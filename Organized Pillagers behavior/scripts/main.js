@@ -64,6 +64,20 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             }
         }
     }
+    else if (id === "op:visualize") {
+        if (sourceEntity) {
+            let x = sourceEntity.location.x;
+            let y = sourceEntity.location.y;
+            let z = sourceEntity.location.z;
+
+            const radius = 48;
+            const height = 10;
+            const depth = 6;
+
+            visualize(sourceEntity.dimension, x, y, z, radius, height, depth);
+        }
+        else world.sendMessage("§cSourceEntity required.");
+    }
     else {
         world.sendMessage("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
     }
@@ -73,6 +87,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 function find_spot_for_settlement(sourceEntity) {
     // get name/identifier for printouts
     const name = sourceEntity.name || sourceEntity.typeId;
+    world.sendMessage("...");   //for debug readability
     
     // get location of sourceEntity
     const x = sourceEntity.location.x;
@@ -98,7 +113,7 @@ function find_spot_for_settlement(sourceEntity) {
         let tickDelay = 20;
         system.runTimeout(() => {
             // Step 2: Check Flatness
-            // -1 for any of these will use default values
+                // -1 for any of these will use default values
             const flatnessRadius = 25;
             const threshold = 10;
             const successPercentage = 0.75;
@@ -114,7 +129,7 @@ function find_spot_for_settlement(sourceEntity) {
                 //     world.sendMessage("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
                 // }
 
-                world.sendMessage("- Note: Forest density not check implemented yet.");
+                // world.sendMessage("- Note: Forest density not check implemented yet.");
             }
         }, tickDelay);
     }
@@ -358,4 +373,30 @@ function get_cardinal_direction(rot_y) {
     else {
         return "east";
     }
+}
+
+//for debug, visualizing the scan that no go blocks function does
+function visualize(dimension, x, y, z, radius, height, depth) 
+{
+    world.sendMessage("§evisualize at " + x.toFixed(2) + " " + y.toFixed(2) + " " + z.toFixed(2) + " using values");
+    world.sendMessage("radius: " + radius);
+    world.sendMessage("height: " + height);
+    world.sendMessage("depth: " + depth);
+    
+    // Iterate through each elevation level within the height and depth range
+    for (let dy = height; dy >= -depth; dy--) {
+        const currentY = y + dy;
+
+        // Step size for scanning (can be adjusted for performance)
+        const stepSize = 2;     //check every n blocks
+
+        // Iterate through the area within the radius on the X and Z axes
+        for (let dx = -radius; dx <= radius; dx += stepSize) {
+            for (let dz = -radius; dz <= radius; dz += stepSize) {
+                dimension.setBlockType({ x: x + dx, y: currentY, z: z + dz }, "minecraft:white_concrete");
+            }
+        }
+    }
+
+    world.sendMessage("Visualize function complete.");
 }
