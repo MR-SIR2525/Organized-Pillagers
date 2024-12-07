@@ -957,12 +957,6 @@
         ]
       },
 
-      // Script: checking for suitable spot failed, need to move to new location
-      "found_man_made_blocks": {
-        "queue_command": {"command": "msg @a[r=1500] §e'found_man_made_blocks' event was triggered."},
-        "trigger": "random_stroll"
-      },
-
       "move_to_random_block": {
         "add": {"component_groups": ["move_to_random_block"]},
         "queue_command": {"command": "msg @a[r=1500] §eMoving to random block."}  //for debug

@@ -87,9 +87,9 @@ function find_spot_for_settlement(sourceEntity) {
     if (fContainsNoGoBlocks) {
         world.sendMessage("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
 
-        // sourceEntity.runCommandAsync("event entity @s .....");
-        sourceEntity.triggerEvent("found_man_made_blocks");
-        
+        sourceEntity.triggerEvent("random_stroll");
+            //pillager will keep periodically doing this until you restore default stroll behavior
+
     }
     else {
         world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
