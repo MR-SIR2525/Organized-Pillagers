@@ -3,9 +3,10 @@
 - manifests to v0.0.107
 - improved some debug messages
 - cleaned up scriptevent if statements
-- updated notes.md, renamed it to readme.md
 - added event to restore default behavior.random_stroll
 - refresh avoid behavior now 6 seconds, was 5
+- updated notes.md, renamed it to readme.md
+- prettified readme and changelog
 
 
 ### 10/25-29/24:
