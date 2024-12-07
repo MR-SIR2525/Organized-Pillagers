@@ -171,6 +171,13 @@
         }
       },
 
+      "default_random_stroll": {
+          "minecraft:behavior.random_stroll": {
+          "priority": 8,
+          "speed_multiplier": 1
+        }
+      },
+
       "random_stroll": {
         "minecraft:behavior.random_stroll": {
           "priority": 4,
@@ -976,12 +983,20 @@
         "queue_command": {"command": "msg @a[r=1500] §eNo longer random stroll."}  //for debug
       },
 
+      "restore_default_random_stroll": {
+        "remove": {"component_groups": ["random_stroll"]},
+        "add": {"component_groups": ["default_random_stroll"]},
+        "queue_command": {"command": "msg @a[r=1500] §eRestoring default random stroll behavior."}  //for debug
+      },
+
+      // not used currently
       "timeout_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
         "trigger": "find_spot_to_create_settlement",
         "queue_command": {"command": "msg @a[r=1500] §eTimed out random stroll."}  //for debug
       },
 
+      // not used currently
       "stop_timeout_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
         "trigger": "find_spot_to_create_settlement",
