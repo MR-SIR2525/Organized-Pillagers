@@ -254,6 +254,8 @@
                 "none_of": [
                   {"test": "has_tag", "subject": "other", "value": "pillager_exempt"} //for testing
                 ]
+                // There were doubts about this combination of filters, but it works. Player with 
+                // "pillager_exempt" tag is truly exempted from the avoid behavior.
               }
             }
           ],
@@ -950,7 +952,7 @@
 
       // Script: checking for suitable spot failed, need to move to new location
       "found_man_made_blocks": {
-        "queue_command": {"command": "msg @a[r=1500] §ejson...   Found man made blocks."},
+        "queue_command": {"command": "msg @a[r=1500] §e'found_man_made_blocks' event was triggered."},
         "trigger": "random_stroll"
       },
 
@@ -961,7 +963,7 @@
 
       "random_stroll": {
         "add": {"component_groups": ["random_stroll"]},
-        "queue_command": {"command": "msg @a[r=1500] §eRandom stroll."}  //for debug
+        "queue_command": {"command": "msg @a[r=1500] §eRandom stroll behavior triggered."}  //for debug
       },
 
       "stop_move_to_random_block": {
