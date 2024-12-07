@@ -8,6 +8,8 @@
 
 ## Notes
 
+**[--- Changelog ---](changelog.md)**
+
 **Pillager settlements/bases**
 - might have to declare them as dwelling inhabitants instead of hostiles...
   - for a raid, dweller role switches back to hostile
