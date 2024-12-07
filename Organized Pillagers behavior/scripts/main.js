@@ -22,26 +22,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
         world.sendMessage("§b" + sourceEntity.name + " facing " + sourceEntity.getRotation().y.toFixed(2));
     }
     else if (id === "op:getBlock") {
-        if (message && sourceEntity) {
-            // expecting format: """x y z"""
-            let coords = message.split(" ");
-            let x = Number.parseFloat(coords[0]);
-            let y = Number.parseFloat(coords[1]);
-            let z = Number.parseFloat(coords[2]);
-            const dimension = sourceEntity.dimension;
-
-            world.sendMessage("§bLocation to use: " + x + " " + y + " " + z);
-
-            const block = dimension.getBlock({ x: x, y: y, z: z });
-            if (block) {
-                world.sendMessage("§bBlock is " + block.type.id + " at " + x + " " + y + " " + z);
-            } else {
-                world.sendMessage("§cUnable to get block. Verify coords are correct and in a loaded area.");
-            }
-        }
-        else {
-            world.sendMessage("§cNeed to specify coords to check in 'x y z' format. SourceEntity required.");
-        }
+        getBlock(message, sourceEntity);
     }
     else if (id === "op:isFlatEnough") {
         if (message && sourceEntity) {
@@ -104,7 +85,7 @@ function find_spot_for_settlement(sourceEntity) {
     // Step 1: Check for "Man-Made" Blocks
     const fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
     if (fContainsNoGoBlocks) {
-        world.sendMessage("§c" + name + " found man-made blocks in the area. Unsuitable for settlement.");
+        world.sendMessage("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
 
         // sourceEntity.runCommandAsync("event entity @s .....");
         sourceEntity.triggerEvent("found_man_made_blocks");
@@ -320,7 +301,7 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
         && flatnessRatio >= successPercentage;
 }
     
-
+// unused at the moment
 function isBelowForestDensity(dimension, x, y, z, radius) {
     const treeBlocks = ["minecraft:log", "minecraft:leaves", /* other tree blocks */];
     let totalBlocks = 0;
@@ -342,6 +323,31 @@ function isBelowForestDensity(dimension, x, y, z, radius) {
 
 
 
+
+/* ********* Functions for testing things ********* */
+
+function getBlock(message, sourceEntity) {
+    if (message && sourceEntity) {
+        // expecting format: """x y z"""
+        let coords = message.split(" ");
+        let x = Number.parseFloat(coords[0]);
+        let y = Number.parseFloat(coords[1]);
+        let z = Number.parseFloat(coords[2]);
+        const dimension = sourceEntity.dimension;
+
+        world.sendMessage("§bLocation to use: " + x + " " + y + " " + z);
+
+        const block = dimension.getBlock({ x: x, y: y, z: z });
+        if (block) {
+            world.sendMessage("§bBlock is " + block.type.id + " at " + x + " " + y + " " + z);
+        } else {
+            world.sendMessage("§cUnable to get block. Verify coords are correct and in a loaded area.");
+        }
+    }
+    else {
+        world.sendMessage("§cNeed to specify coords to check in 'x y z' format. SourceEntity required.");
+    }
+}
 
 
 function getFacing(sourceEntity) {
