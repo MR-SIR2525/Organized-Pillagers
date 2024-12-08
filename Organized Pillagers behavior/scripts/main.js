@@ -116,11 +116,11 @@ async function find_spot_for_settlement(sourceEntity) {
             await system.waitTicks(20);
             
             // building settlement (first thing) logic here
+            return true;
         }
         
     }
-        
-
+    return false;
 }
 
 

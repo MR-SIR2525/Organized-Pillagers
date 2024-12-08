@@ -1,6 +1,9 @@
 ## TODO:
 - **Logic find spot for settlement failing:** 
   - Stroll around...  timer, check again...  x failed attempts puts them in wandering "sleep mode" where searches become less frequent after each fail. Example, every 60 seconds, then every 5 min, etc.
+  - ...
+  - Figure out what function returns what, and how to handle retrying search/scan. Stroll away from bad spot is pretty solid now, except for returns.
+
 - **Logic for successfully finding a good spot:**
   - place marker entity? Store coords in governor pillager entity somehow (tag, property, or scoreboard)?
   - "build" first building of settlement (town square too?)
