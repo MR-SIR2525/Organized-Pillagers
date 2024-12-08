@@ -316,37 +316,31 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     await system.waitTicks(1);
     sourceEntity.triggerEvent("random_stroll");
 
+    // Wait for pillager to execute random stroll
     let waitTime = 180;  // 9 seconds in ticks
     let cycles = 0;
     await system.waitTicks(waitTime);
-    world.sendMessage("§bconst waitTime = " + waitTime);
-    try {
-        world.sendMessage("§bInside try block...");
-        
-        while (sourceEntity.getProperty("var:ended_random_stroll") === false && cycles < 10) {
-            cycles++;
-            world.sendMessage("§bWaiting for random stroll to end... (" + cycles + "/10)");
-            await system.waitTicks(waitTime);
-        }
-        world.sendMessage("§bEnd of try block.");
-    } 
-    catch (error) {
-        world.sendMessage("§cError occurred while waiting for random stroll!");
-        // world.sendMessage(error);
+    while (sourceEntity.getProperty("var:ended_random_stroll") === false && cycles < 10) 
+    {
+        cycles++;
+        world.sendMessage("§bWaiting for random stroll to end... (" + cycles + "/10)");
+        await system.waitTicks(waitTime);
     }
+    world.sendMessage("§bOut of while loop.");
 
+    // Check if the pillager moved far enough
     if (sourceEntity.getProperty("var:ended_random_stroll") === true) {
-        world.sendMessage("§bvar:ended_random_stroll is true, checking distance moved...");
-        // After waiting, get the new location
+        world.sendMessage("§bvar:ended_random_stroll=true, checking distance moved...");
+        
+        // Get new location
         const newX = sourceEntity.location.x;
         const newY = sourceEntity.location.y;
         const newZ = sourceEntity.location.z;
-
         world.sendMessage(
             `§bNew location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
 
         // Euclidean distance formula without the square root for less calculating.
-        // !! Check pillager json file's "random_stroll" comp group for the distance.
+        // !! Check pillager json file's "random_stroll" for correct distance !!
         const minDistanceSquared = 60 ** 2;
         const distanceSquared = 
             (newX - x) ** 2 +
@@ -357,8 +351,11 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
         world.sendMessage(`§bStraight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
 
         if (distanceSquared >= minDistanceSquared) {
-            world.sendMessage("§bSufficient distance from unsuitable spot achieved.");
+            world.sendMessage("§b - Sufficient distance from unsuitable spot achieved.");
             // Perform your heavy scan here
+        }
+        else {
+            world.sendMessage("§b - §cNot enough distance from unsuitable spot.");
         }
     }
 }
