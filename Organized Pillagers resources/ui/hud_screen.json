@@ -1,0 +1,112 @@
+{
+  "namespace": "hud",
+  "my_watermark": {
+    "type": "label",
+    "anchor_from": "bottom_right",
+    "anchor_to": "bottom_right",
+    "text": "game.message.watermark",
+    "shadow": true,
+    "localize": true,
+    "alpha": 0.5,
+    "layer": 31
+  },
+  "hud_title_text/title_frame/title": {
+    "ignored": "($title_text > 'hud.a') and ($title_text < 'hud.z')"
+  },
+  "hud_title_text/subtitle_frame/subtitle": {
+    "ignored": "($subtitle_text > 'hud.a') and ($subtitle_text < 'hud.z')"
+  },
+  "hud_player_renderer": {
+    "ignored": true
+  },
+  "horse_heart_renderer": {
+    "ignored": true
+  },
+  "cooldown_renderer": {
+    "ignored": true
+  },
+  "vignette_renderer": {
+    "ignored": true
+  },
+  "cursor_renderer": {
+    "ignored": false
+  },
+  "hud_elements_bg@common.empty_panel": {
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "hud_elements_bg@hud_elements.hud_elements_bg": {}
+      }
+    ]
+  },
+  "hud_content_bg@common.empty_panel": {
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "hud_elements_bg": {
+          "type": "panel",
+          "factory": {
+            "name": "hud_title_text_factory",
+            "control_ids": {
+              "hud_title_text": "hud_elements_bg@hud.hud_elements_bg"
+            }
+          }
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#hud_visible",
+        "binding_name_override": "#visible",
+        "binding_type": "global"
+      },
+      {
+        "binding_name": "#hud_alpha",
+        "binding_name_override": "#alpha",
+        "binding_type": "global"
+      },
+      {
+        "binding_name": "#hud_propagate_alpha",
+        "binding_name_override": "#propagateAlpha",
+        "binding_type": "global"
+      }
+    ]
+  },
+  "hud_screen@common.base_screen": {
+    "$screen_bg_content": "hud.hud_content_bg",
+    "screen_draws_last": true
+  },
+  "root_panel": {
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_front",
+        "value": [
+          {
+            "hud_elements@common.empty_panel": {
+              "size": [
+                "100%",
+                "100%"
+              ],
+              "factory": {
+                "name": "hud_title_text_factory",
+                "control_ids": {
+                  "hud_title_text": "hud_elements@hud_elements.hud_elements"
+                }
+              }
+            }
+          },
+          {
+            "my_watermark@hud.my_watermark": {}
+          }
+        ]
+      }
+    ]
+  }
+}

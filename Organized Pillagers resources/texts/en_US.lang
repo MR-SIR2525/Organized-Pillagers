@@ -1,3 +1,6 @@
+## Watermark
+game.message.watermark=Organized Pillagers v0.0.108 indev  
+
 ## Entities
 entity.op:persistent_pillager.name=Persistent Pillager
 
