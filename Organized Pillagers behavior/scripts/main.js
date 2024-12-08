@@ -59,6 +59,12 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
         }
         else world.sendMessage("§cSourceEntity required.");
     }
+    else if (id === "op:randomStrollToNewSpot") {
+        if (sourceEntity) {
+            randomStrollToNewSpot(sourceEntity);
+        }
+        else world.sendMessage("§cSourceEntity required.");
+    }
     else {
         world.sendMessage("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
     }
@@ -86,10 +92,7 @@ function find_spot_for_settlement(sourceEntity) {
     const fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
     if (fContainsNoGoBlocks) {
         world.sendMessage("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
-
-        sourceEntity.triggerEvent("random_stroll");
-            //pillager will keep periodically doing this until you restore default stroll behavior
-
+        randomStrollToNewSpot(sourceEntity, x, y, z);
     }
     else {
         world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
@@ -106,6 +109,7 @@ function find_spot_for_settlement(sourceEntity) {
             const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
             if (!fIsFlatEnough) {
                 world.sendMessage("§cArea is not flat enough. Unsuitable for settlement.");
+                randomStrollToNewSpot(sourceEntity, x, y, z);
             }
             else {
                 world.sendMessage("§aArea is flat enough. Suitable for settlement.");
@@ -300,6 +304,59 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
     return deepDropRatio < (1 - successPercentage) 
         && flatnessRatio >= successPercentage;
 }
+
+
+async function randomStrollToNewSpot(sourceEntity, x, y, z) {
+    //debug msg
+    world.sendMessage("§bRunning randomStrollToNewSpot()");
+    // Note: the pillager will keep periodically randomly strolling until default stroll behavior restored.
+
+    // Starting location is passed as x, y, z.
+    sourceEntity.triggerEvent("stop_random_stroll");
+    await system.waitTicks(1);
+    sourceEntity.triggerEvent("random_stroll");
+
+    let waitTime = 180;  // 9 seconds in ticks
+    let cycles = 0;
+    await system.waitTicks(waitTime);
+    while (sourceEntity.getProperty("var:ended_random_stroll" === false && cycles < 10)) {
+        cycles++;
+        await system.waitTicks(waitTime);
+    }
+
+    if (sourceEntity.getProperty("var:ended_random_stroll" === true)) {
+        // After waiting, get the new location
+        const newX = sourceEntity.location.x;
+        const newY = sourceEntity.location.y;
+        const newZ = sourceEntity.location.z;
+
+        world.sendMessage(
+            `New location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
+
+        // Euclidean distance formula without the square root for less calculating.
+        // !! Check pillager json file's "random_stroll" comp group for the distance.
+        const minDistanceSquared = 60 ** 2;
+        const distanceSquared = 
+            (newX - x) ** 2 +
+            (newY - y) ** 2 +
+            (newZ - z) ** 2;
+
+        // Debug message
+        world.sendMessage(`Straight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
+
+        if (distanceSquared >= minDistanceSquared) {
+            world.sendMessage("Sufficient distance from unsuitable spot achieved.");
+            // Perform your heavy scan here
+        }
+
+
+    }
+
+    
+    
+}
+
+
     
 // unused at the moment
 function isBelowForestDensity(dimension, x, y, z, radius) {

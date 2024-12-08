@@ -40,12 +40,19 @@
           "type": "bool",
           "default": false
         },
-        "var:num_timer_cycles": {
+        "var:ended_random_stroll": {
           "client_sync": false,
-          "type": "int",
-          "range": [-1, 3000],
-          "default": 0
+          "type": "bool",
+          "default": false
         }
+
+        // *** Unused ***
+        // "var:num_timer_cycles": {
+        //   "client_sync": false,
+        //   "type": "int",
+        //   "range": [-1, 3000],
+        //   "default": 0
+        // }
       }
     },
 
@@ -182,8 +189,14 @@
         "minecraft:behavior.random_stroll": {
           "priority": 4,
           "interval": 200,
-          "xz_dist": 40,
+          "xz_dist": 64,
           "y_dist": 7
+        },
+        "minecraft:behavior.timer_flag_1": {
+          "on_end": {
+            "target": "self",
+            "event": "ended_random_stroll"
+          }
         }
       },
 
@@ -957,6 +970,13 @@
         ]
       },
 
+      //for script testing
+      "run_randomStrollToNewSpot": {
+        "queue_command": {
+          "command": "scriptevent op:randomStrollToNewSpot ..."
+        }
+      },
+
       "move_to_random_block": {
         "add": {"component_groups": ["move_to_random_block"]},
         "queue_command": {"command": "msg @a[r=1500] §eMoving to random block."}  //for debug
@@ -967,6 +987,20 @@
         "queue_command": {"command": "msg @a[r=1500] §eRandom stroll behavior triggered."}  //for debug
       },
 
+      "ended_random_stroll": {
+        "set_property": {
+          "var:ended_random_stroll": true
+        },
+        "queue_command": {"command": "msg @a[r=1500] §eFlag: Ended random stroll (property=true now)."}  //for debug
+      },
+
+      "ended_random_stroll_false": {
+        "set_property": {
+          "var:ended_random_stroll": false
+        },
+        "queue_command": {"command": "msg @a[r=1500] §eended_random_stroll property=false."}  //for debug
+      },
+
       "stop_move_to_random_block": {
         "remove": {"component_groups": ["move_to_random_block"]},
         "queue_command": {"command": "msg @a[r=1500] §eNo longer moving to random block."}  //for debug
@@ -974,13 +1008,20 @@
 
       "stop_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
+        "trigger": "ended_random_stroll_false",
         "queue_command": {"command": "msg @a[r=1500] §eNo longer random stroll."}  //for debug
       },
 
       "restore_default_random_stroll": {
-        "remove": {"component_groups": ["random_stroll"]},
-        "add": {"component_groups": ["default_random_stroll"]},
-        "queue_command": {"command": "msg @a[r=1500] §eRestoring default random stroll behavior."}  //for debug
+        "sequence": [
+          {
+            "trigger": "stop_random_stroll"
+          },
+          {
+            "add": {"component_groups": ["default_random_stroll"]},
+            "queue_command": {"command": "msg @a[r=1500] §eRestoring default random stroll behavior."}  //for debug
+          }
+        ]
       },
 
       // not used currently
