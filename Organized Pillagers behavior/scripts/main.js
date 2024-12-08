@@ -71,7 +71,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 });
 
 
-function find_spot_for_settlement(sourceEntity) {
+async function find_spot_for_settlement(sourceEntity) {
     // get name/identifier for printouts
     const name = sourceEntity.name || sourceEntity.typeId;
     print("...");   //for debug readability
@@ -95,32 +95,29 @@ function find_spot_for_settlement(sourceEntity) {
         randomStrollToNewSpot(sourceEntity, x, y, z);
     }
     else {
+        // Step 2: Check Flatness
         print("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
         print("Ready to check flatness...");
+        await system.waitTicks(20);
 
-        let tickDelay = 20;
-        system.runTimeout(() => {
-            // Step 2: Check Flatness
-                // -1 for any of these will use default values
-            const flatnessRadius = 25;
-            const threshold = 10;
-            const successPercentage = 0.75;
+        // -1 for any of these will use default values
+        const flatnessRadius = 25;
+        const threshold = 10;
+        const successPercentage = 0.75;
 
-            const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
-            if (!fIsFlatEnough) {
-                print("§cArea is not flat enough. Unsuitable for settlement.");
-                randomStrollToNewSpot(sourceEntity, x, y, z);
-            }
-            else {
-                print("§aArea is flat enough. Suitable for settlement.");
-                // Step 3: Check Forest Density
-                // if (!isBelowForestDensity(dimension, x, y, z, radius)) {
-                //     print("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
-                // }
-
-                // print("- Note: Forest density not check implemented yet.");
-            }
-        }, tickDelay);
+        const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
+        if (!fIsFlatEnough) {
+            print("§cArea is not flat enough. Unsuitable for settlement.");
+            await system.waitTicks(20);
+            randomStrollToNewSpot(sourceEntity, x, y, z);
+        }
+        else {
+            print("§aArea is flat enough. Suitable for settlement.");
+            await system.waitTicks(20);
+            
+            // building settlement (first thing) logic here
+        }
+        
     }
         
 
