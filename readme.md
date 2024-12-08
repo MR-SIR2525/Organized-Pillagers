@@ -37,6 +37,11 @@
 **Docs**
 https://jaylydev.github.io/scriptapi-docs/1.21.23/modules/_minecraft_server_1_13_0.html
 
+**How does JS pass things to functions?**
+Short answer: it uses a pass-by-value strategy for primitive types and a pass-by-sharing strategy for objects.
+See https://stackoverflow.com/questions/518000/is-javascript-a-pass-by-reference-or-pass-by-value-language
+In particular, objects are passed by a reference to the value, which is copied and passed to the function. This means that if the function modifies the object, the caller will see the changes, but if the function assigns a new value to the object, the caller will not see the change.
+
 
 
 ## Helpful Links
