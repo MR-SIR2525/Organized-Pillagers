@@ -332,34 +332,42 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     if (sourceEntity.getProperty("var:ended_random_stroll") === true) {
         print("§bvar:ended_random_stroll=true, checking distance moved...");
         
-        // Get new location
-        const newX = sourceEntity.location.x;
-        const newY = sourceEntity.location.y;
-        const newZ = sourceEntity.location.z;
-        print(
-            `§bNew location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
-
-        // Euclidean distance formula without the square root for less calculating.
-        // !! Check pillager json file's "random_stroll" for correct distance !!
-        const minDistanceSquared = 60 ** 2;
-        const distanceSquared = 
-            (newX - x) ** 2 +
-            (newY - y) ** 2 +
-            (newZ - z) ** 2;
-
-        // Debug message
-        print(`§bStraight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
-
-        if (distanceSquared >= minDistanceSquared) {
+        if (await strolledFarEnough(sourceEntity, x, y, z)) {
             print("§b - Sufficient distance from unsuitable spot achieved.");
             // Perform your heavy scan here
         }
         else {
-            print("§b - §cNot enough distance from unsuitable spot.");
+            print("§b - Not far enough from unsuitable spot.");
         }
     }
 }
 
+
+async function strolledFarEnough(sourceEntity, x, y, z) {
+    // Get new location
+    const newX = sourceEntity.location.x;
+    const newY = sourceEntity.location.y;
+    const newZ = sourceEntity.location.z;
+    print(
+        `§bNew location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
+
+    // Euclidean distance formula without the square root for less calculating.
+    // !! Check pillager json file's "random_stroll" for correct distance !!
+    const minDistanceSquared = 60 ** 2;
+    const distanceSquared = 
+        (newX - x) ** 2 +
+        (newY - y) ** 2 +
+        (newZ - z) ** 2;
+
+    // Debug message
+    print(`§bStraight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
+
+    if (distanceSquared >= minDistanceSquared) {
+        return true;
+    }
+    
+    return false;
+}
 
     
 // unused at the moment
