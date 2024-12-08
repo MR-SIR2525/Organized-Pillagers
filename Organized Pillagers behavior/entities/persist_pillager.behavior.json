@@ -959,9 +959,6 @@
             "trigger": "governor_pillager"
           },
           {
-            "filters": {
-              "test": "on_ground", "value": true
-            },
             //this is where script jumps in
             "queue_command": {
               "command": "scriptevent op:find_spot_for_settlement ..."
