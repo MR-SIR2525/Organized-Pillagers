@@ -19,7 +19,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
         getFacing(sourceEntity);
     }
     else if (id === "op:getYRot") {
-        world.sendMessage("§b" + sourceEntity.name + " facing " + sourceEntity.getRotation().y.toFixed(2));
+        print("§b" + sourceEntity.name + " facing " + sourceEntity.getRotation().y.toFixed(2));
     }
     else if (id === "op:getBlock") {
         getBlock(message, sourceEntity);
@@ -38,10 +38,10 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             let successPercentage = Number.parseFloat(coords[5]);
 
             if (isFlatEnough(sourceEntity.dimension, x, y, z, radius, threshold, successPercentage)) {
-                world.sendMessage("§aThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is flat enough.");
+                print("§aThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is flat enough.");
             }
             else {
-                world.sendMessage("§cThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is not flat enough.");
+                print("§cThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is not flat enough.");
             }
         }
     }
@@ -57,16 +57,16 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 
             visualize(sourceEntity.dimension, x, y, z, radius, height, depth);
         }
-        else world.sendMessage("§cSourceEntity required.");
+        else print("§cSourceEntity required.");
     }
     else if (id === "op:randomStrollToNewSpot") {
         if (sourceEntity) {
             randomStrollToNewSpot(sourceEntity);
         }
-        else world.sendMessage("§cSourceEntity required.");
+        else print("§cSourceEntity required.");
     }
     else {
-        world.sendMessage("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
+        print("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
     }
 });
 
@@ -74,7 +74,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 function find_spot_for_settlement(sourceEntity) {
     // get name/identifier for printouts
     const name = sourceEntity.name || sourceEntity.typeId;
-    world.sendMessage("...");   //for debug readability
+    print("...");   //for debug readability
     
     // get location of sourceEntity
     const x = sourceEntity.location.x;
@@ -91,12 +91,12 @@ function find_spot_for_settlement(sourceEntity) {
     // Step 1: Check for "Man-Made" Blocks
     const fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
     if (fContainsNoGoBlocks) {
-        world.sendMessage("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
+        print("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
         randomStrollToNewSpot(sourceEntity, x, y, z);
     }
     else {
-        world.sendMessage("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
-        world.sendMessage("Ready to check flatness...");
+        print("§a" + name + " found no man-made blocks in the area. Suitable for settlement.");
+        print("Ready to check flatness...");
 
         let tickDelay = 20;
         system.runTimeout(() => {
@@ -108,17 +108,17 @@ function find_spot_for_settlement(sourceEntity) {
 
             const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
             if (!fIsFlatEnough) {
-                world.sendMessage("§cArea is not flat enough. Unsuitable for settlement.");
+                print("§cArea is not flat enough. Unsuitable for settlement.");
                 randomStrollToNewSpot(sourceEntity, x, y, z);
             }
             else {
-                world.sendMessage("§aArea is flat enough. Suitable for settlement.");
+                print("§aArea is flat enough. Suitable for settlement.");
                 // Step 3: Check Forest Density
                 // if (!isBelowForestDensity(dimension, x, y, z, radius)) {
-                //     world.sendMessage("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
+                //     print("§c" + name + " found the area too dense with trees. Unsuitable for settlement.");
                 // }
 
-                // world.sendMessage("- Note: Forest density not check implemented yet.");
+                // print("- Note: Forest density not check implemented yet.");
             }
         }, tickDelay);
     }
@@ -200,10 +200,10 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
     ]);
 
     // for debug
-    world.sendMessage("checking for manmade blocks around " + x.toFixed(2) + " " + y.toFixed(2) + " " + z.toFixed(2) + " using values");
-    world.sendMessage("radius: " + radius);
-    world.sendMessage("height: " + height);
-    world.sendMessage("depth: " + depth);
+    print("checking for manmade blocks around " + x.toFixed(2) + " " + y.toFixed(2) + " " + z.toFixed(2) + " using values");
+    print("radius: " + radius);
+    print("height: " + height);
+    print("depth: " + depth);
     
     // Iterate top-down through each elevation level within the height and depth range
     for (let dy = height; dy >= -depth; dy--) {
@@ -239,7 +239,7 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
             threshold = 10;
         else {
             threshold = 1;
-            world.sendMessage("§cError: Invalid threshold " + threshold + ". Using 1 instead.");
+            print("§cError: Invalid threshold " + threshold + ". Using 1 instead.");
         }
     }
     if (successPercentage < 0.0 || successPercentage > 1.0) {
@@ -247,14 +247,14 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
             successPercentage = 0.70;
         else {
             successPercentage = 0.70;
-            world.sendMessage("§cError: Invalid successPercentage " + successPercentage + ". Using 0.70 instead.");
+            print("§cError: Invalid successPercentage " + successPercentage + ". Using 0.70 instead.");
         }
     }
 
     // for debug
-    world.sendMessage("radius = " + radius);
-    world.sendMessage("threshold = " + threshold);
-    world.sendMessage("successPercentage = " + successPercentage);
+    print("radius = " + radius);
+    print("threshold = " + threshold);
+    print("successPercentage = " + successPercentage);
 
     let flatBlockCount = 0;
     let totalBlockCount = 0;
@@ -297,8 +297,8 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
     const deepDropRatio = deepDropsCount / totalBlockCount;
     const flatnessRatio = flatBlockCount / totalBlockCount;
 
-    world.sendMessage("Deep drop ratio = " + deepDropRatio.toFixed(2));
-    world.sendMessage("Flatness ratio = " + flatnessRatio.toFixed(2));
+    print("Deep drop ratio = " + deepDropRatio.toFixed(2));
+    print("Flatness ratio = " + flatnessRatio.toFixed(2));
 
     // if any of these fail, return false
     return deepDropRatio < (1 - successPercentage) 
@@ -308,7 +308,7 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
 
 async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     //debug msg
-    world.sendMessage("§bRunning randomStrollToNewSpot()");
+    print("§bRunning randomStrollToNewSpot()");
     // Note: the pillager will keep periodically randomly strolling until default stroll behavior restored.
 
     // Starting location is passed as x, y, z.
@@ -323,20 +323,20 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     while (sourceEntity.getProperty("var:ended_random_stroll") === false && cycles < 10) 
     {
         cycles++;
-        world.sendMessage("§bWaiting for random stroll to end... (" + cycles + "/10)");
+        print("§bWaiting for random stroll to end... (" + cycles + "/10)");
         await system.waitTicks(waitTime);
     }
-    world.sendMessage("§bOut of while loop.");
+    print("§bOut of while loop.");
 
     // Check if the pillager moved far enough
     if (sourceEntity.getProperty("var:ended_random_stroll") === true) {
-        world.sendMessage("§bvar:ended_random_stroll=true, checking distance moved...");
+        print("§bvar:ended_random_stroll=true, checking distance moved...");
         
         // Get new location
         const newX = sourceEntity.location.x;
         const newY = sourceEntity.location.y;
         const newZ = sourceEntity.location.z;
-        world.sendMessage(
+        print(
             `§bNew location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
 
         // Euclidean distance formula without the square root for less calculating.
@@ -348,14 +348,14 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
             (newZ - z) ** 2;
 
         // Debug message
-        world.sendMessage(`§bStraight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
+        print(`§bStraight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
 
         if (distanceSquared >= minDistanceSquared) {
-            world.sendMessage("§b - Sufficient distance from unsuitable spot achieved.");
+            print("§b - Sufficient distance from unsuitable spot achieved.");
             // Perform your heavy scan here
         }
         else {
-            world.sendMessage("§b - §cNot enough distance from unsuitable spot.");
+            print("§b - §cNot enough distance from unsuitable spot.");
         }
     }
 }
@@ -383,6 +383,11 @@ function isBelowForestDensity(dimension, x, y, z, radius) {
 }
 
 
+/* ********* Utilities ********* */
+
+function print(message) {
+    world.sendMessage(`§0Script: §f${message}`);
+}
 
 
 /* ********* Functions for testing things ********* */
@@ -396,17 +401,17 @@ function getBlock(message, sourceEntity) {
         let z = Number.parseFloat(coords[2]);
         const dimension = sourceEntity.dimension;
 
-        world.sendMessage("§bLocation to use: " + x + " " + y + " " + z);
+        print("§bLocation to use: " + x + " " + y + " " + z);
 
         const block = dimension.getBlock({ x: x, y: y, z: z });
         if (block) {
-            world.sendMessage("§bBlock is " + block.type.id + " at " + x + " " + y + " " + z);
+            print("§bBlock is " + block.type.id + " at " + x + " " + y + " " + z);
         } else {
-            world.sendMessage("§cUnable to get block. Verify coords are correct and in a loaded area.");
+            print("§cUnable to get block. Verify coords are correct and in a loaded area.");
         }
     }
     else {
-        world.sendMessage("§cNeed to specify coords to check in 'x y z' format. SourceEntity required.");
+        print("§cNeed to specify coords to check in 'x y z' format. SourceEntity required.");
     }
 }
 
@@ -417,7 +422,7 @@ function getFacing(sourceEntity) {
         // Issue: Non-player entities don't update until entity intends to move that direction.
     let rotation = sourceEntity.getRotation();
     let direction = get_cardinal_direction(rotation.y);
-    world.sendMessage("§b" + name + " is facing " + direction);
+    print("§b" + name + " is facing " + direction);
 }
 
 /*  @Returns: String "north", "south", "west", or "east
@@ -449,10 +454,10 @@ function get_cardinal_direction(rot_y) {
 //for debug, visualizing the scan that no go blocks function does
 function visualize(dimension, x, y, z, radius, height, depth) 
 {
-    world.sendMessage("§evisualize at " + x.toFixed(2) + " " + y.toFixed(2) + " " + z.toFixed(2) + " using values");
-    world.sendMessage("radius: " + radius);
-    world.sendMessage("height: " + height);
-    world.sendMessage("depth: " + depth);
+    print("§evisualize at " + x.toFixed(2) + " " + y.toFixed(2) + " " + z.toFixed(2) + " using values");
+    print("radius: " + radius);
+    print("height: " + height);
+    print("depth: " + depth);
     
     // Iterate through each elevation level within the height and depth range
     for (let dy = height; dy >= -depth; dy--) {
@@ -469,5 +474,5 @@ function visualize(dimension, x, y, z, radius, height, depth)
         }
     }
 
-    world.sendMessage("Visualize function complete.");
+    print("Visualize function complete.");
 }
