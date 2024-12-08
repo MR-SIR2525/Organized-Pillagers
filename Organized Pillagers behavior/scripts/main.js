@@ -319,19 +319,31 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     let waitTime = 180;  // 9 seconds in ticks
     let cycles = 0;
     await system.waitTicks(waitTime);
-    while (sourceEntity.getProperty("var:ended_random_stroll" === false && cycles < 10)) {
-        cycles++;
-        await system.waitTicks(waitTime);
+    world.sendMessage("§bconst waitTime = " + waitTime);
+    try {
+        world.sendMessage("§bInside try block...");
+        
+        while (sourceEntity.getProperty("var:ended_random_stroll") === false && cycles < 10) {
+            cycles++;
+            world.sendMessage("§bWaiting for random stroll to end... (" + cycles + "/10)");
+            await system.waitTicks(waitTime);
+        }
+        world.sendMessage("§bEnd of try block.");
+    } 
+    catch (error) {
+        world.sendMessage("§cError occurred while waiting for random stroll!");
+        // world.sendMessage(error);
     }
 
-    if (sourceEntity.getProperty("var:ended_random_stroll" === true)) {
+    if (sourceEntity.getProperty("var:ended_random_stroll") === true) {
+        world.sendMessage("§bvar:ended_random_stroll is true, checking distance moved...");
         // After waiting, get the new location
         const newX = sourceEntity.location.x;
         const newY = sourceEntity.location.y;
         const newZ = sourceEntity.location.z;
 
         world.sendMessage(
-            `New location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
+            `§bNew location: x=${Math.round(newX)}, y=${Math.round(newY)}, z=${Math.round(newZ)}`);
 
         // Euclidean distance formula without the square root for less calculating.
         // !! Check pillager json file's "random_stroll" comp group for the distance.
@@ -342,18 +354,13 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
             (newZ - z) ** 2;
 
         // Debug message
-        world.sendMessage(`Straight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
+        world.sendMessage(`§bStraight-line distance moved: ${Math.round(Math.sqrt(distanceSquared))} blocks`);
 
         if (distanceSquared >= minDistanceSquared) {
-            world.sendMessage("Sufficient distance from unsuitable spot achieved.");
+            world.sendMessage("§bSufficient distance from unsuitable spot achieved.");
             // Perform your heavy scan here
         }
-
-
     }
-
-    
-    
 }
 
 
