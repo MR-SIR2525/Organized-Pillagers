@@ -11,7 +11,7 @@
 
 ## Notes
 
-**[--- Changelog ---](changelog.md)**
+**[--- View Changelog ---](changelog.md)**
 
 **Pillager settlements/bases**
 - might have to declare them as dwelling inhabitants instead of hostiles...
