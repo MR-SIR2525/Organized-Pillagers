@@ -27,6 +27,23 @@
           "client_sync": false,
           "type": "bool",
           "default": false
+        },
+
+        // ** Home coords **
+        "var:x": {
+          "client_sync": false,
+          "type": "int",
+          "default": 0
+        },
+        "var:y": {
+          "client_sync": false,
+          "type": "int",
+          "default": 70
+        },
+        "var:z": {
+          "client_sync": false,
+          "type": "int",
+          "default": 0
         }
 
         // *** Unused ***
