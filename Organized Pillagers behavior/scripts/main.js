@@ -337,6 +337,15 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
             print("§b - Not far enough from unsuitable spot.");
         }
     }
+
+    // for debug
+    restore_default_random_stroll(sourceEntity);
+}
+
+
+async function restore_default_random_stroll(sourceEntity) {
+    sourceEntity.triggerEvent("restore_default_random_stroll");
+    await system.waitTicks(1);
 }
 
 
