@@ -1001,7 +1001,7 @@
         "queue_command": {"command": "msg @a[r=1500] §eReset 'finished_random_stroll' to false."}  //for debug
       },
 
-      "stop_move_to_random_block": {
+      "remove_move_to_random_block": {
         "remove": {"component_groups": ["move_to_random_block"]},
         "queue_command": {"command": "msg @a[r=1500] §eNo longer moving to random block."}  //for debug
       },
