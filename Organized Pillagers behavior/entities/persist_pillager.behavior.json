@@ -18,23 +18,6 @@
           "type": "bool",
           "default": false
         },
-        "var:air_blocks_found": {
-          "client_sync": false,
-          "type": "int",
-          "range": [-1, 1000],
-          "default": 0
-        },
-        "var:desired_air_blocks": {
-          "client_sync": false,
-          "type": "int",
-          "range": [-1, 1000],
-          "default": 0
-        },
-        "var:found_manmade_blocks": {
-          "client_sync": false,
-          "type": "bool",
-          "default": false
-        },
         "var:site_is_ok": {
           "client_sync": false,
           "type": "bool",
