@@ -150,14 +150,10 @@ async function is_suitable_area(dimension, x, y, z, name="{name unset}") {
         let fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
         if (!fIsFlatEnough) {
             print("§cArea is not flat enough. Unsuitable for settlement.");
-            await system.waitTicks(20);
-            randomStrollToNewSpot(sourceEntity, x, y, z);
+            return false;
         }
         else {
             print("§aArea is flat enough. Suitable for settlement.");
-            await system.waitTicks(20);
-            
-            // building settlement (first thing) logic here
             return true;
         }
         
