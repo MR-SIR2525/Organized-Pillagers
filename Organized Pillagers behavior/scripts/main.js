@@ -89,7 +89,7 @@ async function find_spot_for_settlement(sourceEntity) {
 
     while (!good_spot && attempts < 10) {
         print("§c" + name + " did not find a suitable area.");
-        randomStrollToNewSpot(sourceEntity, x, y, z);
+        await randomStrollToNewSpot(sourceEntity, x, y, z);
 
         if (await strolledFarEnough(sourceEntity, x, y, z)) {
             if (await is_suitable_area(dimension, x, y, z, name)) {
