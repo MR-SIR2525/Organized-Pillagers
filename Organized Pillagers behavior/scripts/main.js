@@ -110,8 +110,17 @@ async function find_spot_for_settlement(sourceEntity) {
         return false;
     }
 
-    // We have a good spot!
-    print("§a" + name + " found a suitable area at " + x + " " + y + " " + z + ".");
+    // We have a good spot! Get coords (rounded)
+    let new_x = Math.round(sourceEntity.location.x);
+    let new_y = Math.round(sourceEntity.location.y);
+    let new_z = Math.round(sourceEntity.location.z);
+
+    // Store coords to Pillager
+    sourceEntity.setProperty("var:x", new_x);
+    sourceEntity.setProperty("var:y", new_y);
+    sourceEntity.setProperty("var:z", new_z);
+    print("§a" + name + " found a suitable area at " + new_x + " " + new_y + " " + new_z + ".");
+
     return true;
 }
 
