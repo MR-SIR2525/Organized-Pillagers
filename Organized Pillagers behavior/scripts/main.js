@@ -134,7 +134,7 @@ async function is_suitable_area(dimension, x, y, z, name="{name unset}") {
     let fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
     if (fContainsNoGoBlocks) {
         print("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
-        randomStrollToNewSpot(sourceEntity, x, y, z);
+        return false;
     }
     else {
         // Step 2: Check Flatness
