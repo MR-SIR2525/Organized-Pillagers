@@ -304,11 +304,10 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
 
 
 async function randomStrollToNewSpot(sourceEntity, x, y, z) {
-    //debug msg
-    print("§bRunning randomStrollToNewSpot()");
-    // Note: the pillager will keep periodically randomly strolling until default stroll behavior restored.
-
     // Starting location is passed as x, y, z.
+    print("§bRunning randomStrollToNewSpot()"); //debug msg
+
+    // Note: pillager will keep periodically randomly strolling until default stroll behavior restored.
     sourceEntity.triggerEvent("restore_default_random_stroll");
     await system.waitTicks(1);
     sourceEntity.triggerEvent("random_stroll");
