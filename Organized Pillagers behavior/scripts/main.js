@@ -329,8 +329,9 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
         print("§bvar:ended_random_stroll=true, checking distance moved...");
         
         if (await strolledFarEnough(sourceEntity, x, y, z)) {
-            print("§b - Sufficient distance from unsuitable spot achieved.");
-            // Perform your heavy scan here
+            print("§b - Sufficient distance from unsuitable spot.");
+            // Scan new spot
+            
         }
         else {
             print("§b - Not far enough from unsuitable spot.");
