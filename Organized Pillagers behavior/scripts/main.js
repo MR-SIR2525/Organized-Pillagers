@@ -368,9 +368,8 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
 }
 
 
-async function restore_default_random_stroll(sourceEntity) {
+function restore_default_random_stroll(sourceEntity) {
     sourceEntity.triggerEvent("restore_default_random_stroll");
-    await system.waitTicks(1);
 }
 
 
