@@ -89,7 +89,7 @@ async function find_spot_for_settlement(sourceEntity) {
     const depth = 6;
     
     // Step 1: Check for "Man-Made" Blocks
-    const fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
+    let fContainsNoGoBlocks = containsNoGoBlocks(dimension, x, y, z, radius, height, depth)
     if (fContainsNoGoBlocks) {
         print("§e" + name + " §cfound man-made blocks in the area. Unsuitable for settlement.");
         randomStrollToNewSpot(sourceEntity, x, y, z);
@@ -105,7 +105,7 @@ async function find_spot_for_settlement(sourceEntity) {
         const threshold = 10;
         const successPercentage = 0.75;
 
-        const fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
+        let fIsFlatEnough = isFlatEnough(dimension, x, y, z, flatnessRadius, threshold, successPercentage);
         if (!fIsFlatEnough) {
             print("§cArea is not flat enough. Unsuitable for settlement.");
             await system.waitTicks(20);
