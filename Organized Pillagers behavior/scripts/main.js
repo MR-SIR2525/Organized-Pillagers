@@ -70,7 +70,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     }
 });
 
-
+/* ************ The main driver function ************ */
 async function find_spot_for_settlement(sourceEntity) {
     // get name/identifier for printouts
     const name = sourceEntity.name || sourceEntity.typeId;
@@ -84,6 +84,39 @@ async function find_spot_for_settlement(sourceEntity) {
 
 
     //start checking around self for suitable area
+    let good_spot = await is_suitable_area(dimension, x, y, z, name);
+    let attempts = 0;
+
+    while (!good_spot && attempts < 10) {
+        print("§c" + name + " did not find a suitable area.");
+        randomStrollToNewSpot(sourceEntity, x, y, z);
+
+        if (await strolledFarEnough(sourceEntity, x, y, z)) {
+            if (await is_suitable_area(dimension, x, y, z, name)) {
+                good_spot = true;
+                break;
+            }
+        }
+
+        attempts += 1;
+        print("Attempt " + attempts);
+    }
+    restore_default_random_stroll(sourceEntity);
+
+    if (!good_spot) {
+        print("§c" + name + " could not find a suitable area within 10 attempts.");
+        // maybe Pillager snoozes the search for 20 min or something, otherwise just give up?
+        // become normal pilager and allow self to despawn?
+        return false;
+    }
+
+    // We have a good spot!
+    print("§a" + name + " found a suitable area at " + x + " " + y + " " + z + ".");
+    return true;
+}
+
+
+async function is_suitable_area(dimension, x, y, z, name="{name unset}") {
     const radius = 48;
     const height = 10;
     const depth = 6;
@@ -302,13 +335,16 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
         && flatnessRatio >= successPercentage;
 }
 
-
+/*
+ * Returns true if the pillager moved far enough from the starting location, false otherwise.
+*/
 async function randomStrollToNewSpot(sourceEntity, x, y, z) {
+    // Note: pillager will keep periodically randomly strolling until default stroll behavior restored.
     // Starting location is passed as x, y, z.
     print("§bRunning randomStrollToNewSpot()"); //debug msg
 
-    // Note: pillager will keep periodically randomly strolling until default stroll behavior restored.
-    sourceEntity.triggerEvent("restore_default_random_stroll");
+    // Remove and re-add random stroll to prompt new random stroll.
+    sourceEntity.triggerEvent("remove_random_stroll");
     await system.waitTicks(1);
     sourceEntity.triggerEvent("random_stroll");
 
@@ -323,23 +359,7 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
         await system.waitTicks(waitTime);
     }
     print("§bRandom stroll ended; Out of while loop.");
-
-    // Check if the pillager moved far enough
-    if (sourceEntity.getProperty("var:ended_random_stroll") === true) {
-        print("§bvar:ended_random_stroll=true, checking distance moved...");
-        
-        if (await strolledFarEnough(sourceEntity, x, y, z)) {
-            print("§b - Sufficient distance from unsuitable spot.");
-            // Scan new spot
-            
-        }
-        else {
-            print("§b - Not far enough from unsuitable spot.");
-        }
-    }
-
-    // for debug
-    restore_default_random_stroll(sourceEntity);
+    return true;
 }
 
 
