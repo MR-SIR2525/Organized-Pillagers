@@ -88,7 +88,7 @@ async function find_spot_for_settlement(sourceEntity) {
     let attempts = 0;
 
     while (!good_spot && attempts < 10) {
-        print("§c" + name + " did not find a suitable area.");
+        print("§e" + name + " did not find a suitable area. Attempt stroll away from it.");
         await randomStrollToNewSpot(sourceEntity, x, y, z);
 
         if (await strolledFarEnough(sourceEntity, x, y, z)) {
@@ -97,9 +97,12 @@ async function find_spot_for_settlement(sourceEntity) {
                 break;
             }
         }
+        else {
+            print("§e" + name + " did not stroll far enough. Try again.");
+        }
 
         attempts += 1;
-        print("Attempt " + attempts);
+        print("§eAttempt " + attempts);
     }
     restore_default_random_stroll(sourceEntity);
 
@@ -350,7 +353,7 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
 
     // Remove and re-add random stroll to prompt new random stroll.
     sourceEntity.triggerEvent("remove_random_stroll");
-    await system.waitTicks(1);
+    await system.waitTicks(10);
     sourceEntity.triggerEvent("random_stroll");
 
     // Wait for pillager to execute random stroll
