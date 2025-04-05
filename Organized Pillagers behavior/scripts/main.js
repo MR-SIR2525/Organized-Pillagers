@@ -309,21 +309,21 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     // Note: the pillager will keep periodically randomly strolling until default stroll behavior restored.
 
     // Starting location is passed as x, y, z.
-    sourceEntity.triggerEvent("stop_random_stroll");
+    sourceEntity.triggerEvent("restore_default_random_stroll");
     await system.waitTicks(1);
     sourceEntity.triggerEvent("random_stroll");
 
     // Wait for pillager to execute random stroll
     let waitTime = 180;  // 9 seconds in ticks
-    let cycles = 0;
+    let loopCycles = 0;
     await system.waitTicks(waitTime);
-    while (sourceEntity.getProperty("var:ended_random_stroll") === false && cycles < 10) 
+    while (sourceEntity.getProperty("var:finished_random_stroll") === false && loopCycles < 10) 
     {
-        cycles++;
-        print("§bWaiting for random stroll to end... (" + cycles + "/10)");
+        loopCycles++;
+        print("§bWaiting for random stroll to end... (" + loopCycles + "/10)");
         await system.waitTicks(waitTime);
     }
-    print("§bOut of while loop.");
+    print("§bRandom stroll ended; Out of while loop.");
 
     // Check if the pillager moved far enough
     if (sourceEntity.getProperty("var:ended_random_stroll") === true) {
