@@ -33,17 +33,20 @@
         "var:x": {
           "client_sync": false,
           "type": "int",
-          "default": 0
+          "default": 0,
+          "range": [-16500000, 16500000]
         },
         "var:y": {
           "client_sync": false,
           "type": "int",
-          "default": 70
+          "default": 70,
+          "range": [-16500000, 16500000]
         },
         "var:z": {
           "client_sync": false,
           "type": "int",
-          "default": 0
+          "default": 0,
+          "range": [-16500000, 16500000]
         }
 
         // *** Unused ***
