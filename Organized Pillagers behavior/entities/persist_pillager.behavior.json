@@ -40,7 +40,7 @@
           "type": "bool",
           "default": false
         },
-        "var:ended_random_stroll": {
+        "var:finished_random_stroll": {
           "client_sync": false,
           "type": "bool",
           "default": false
@@ -195,7 +195,7 @@
         "minecraft:behavior.timer_flag_1": {
           "on_end": {
             "target": "self",
-            "event": "ended_random_stroll"
+            "event": "finished_random_stroll"
           }
         }
       },
@@ -984,18 +984,18 @@
         "queue_command": {"command": "msg @a[r=1500] §eRandom stroll behavior triggered."}  //for debug
       },
 
-      "ended_random_stroll": {
+      "finished_random_stroll": {
         "set_property": {
-          "var:ended_random_stroll": true
+          "var:finished_random_stroll": true
         },
-        "queue_command": {"command": "msg @a[r=1500] §eFlag: Ended random stroll (property=true now)."}  //for debug
+        "queue_command": {"command": "msg @a[r=1500] §eFinished random stroll."}  //for debug
       },
 
-      "ended_random_stroll_false": {
+      "finished_random_stroll_false": {
         "set_property": {
-          "var:ended_random_stroll": false
+          "var:finished_random_stroll": false
         },
-        "queue_command": {"command": "msg @a[r=1500] §eended_random_stroll property=false."}  //for debug
+        "queue_command": {"command": "msg @a[r=1500] §eReset 'finished_random_stroll' to false."}  //for debug
       },
 
       "stop_move_to_random_block": {
@@ -1003,16 +1003,16 @@
         "queue_command": {"command": "msg @a[r=1500] §eNo longer moving to random block."}  //for debug
       },
 
-      "stop_random_stroll": {
+      "remove_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
-        "trigger": "ended_random_stroll_false",
-        "queue_command": {"command": "msg @a[r=1500] §eNo longer random stroll."}  //for debug
+        "trigger": "finished_random_stroll_false",
+        "queue_command": {"command": "msg @a[r=1500] §eStopping random stroll."}  //for debug
       },
 
       "restore_default_random_stroll": {
         "sequence": [
           {
-            "trigger": "stop_random_stroll"
+            "trigger": "remove_random_stroll"
           },
           {
             "add": {"component_groups": ["default_random_stroll"]},
