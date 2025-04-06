@@ -1,24 +1,24 @@
 {
     "format_version": 2,
     "header": {
-        "name": "Organized Pillagers (resources) v0.0.108",
+        "name": "Organized Pillagers resources v0.0.109",
         "description": "Resource pack for Organized Pillagers addon by MRxSIR.",
         "uuid": "4f2e0be3-b809-4e14-a986-e404dc35b858",
         "min_engine_version": [1, 20, 10],
-        "version": [0, 0, 108]
+        "version": [0, 0, 109]
     },
     "modules": [
         {
             "type": "resources",
             "description": "resource pack for Organized Pillagers addon",
             "uuid": "3e6e164a-a652-4db0-9585-0bf1477365d7",
-            "version": [0, 0, 108]
+            "version": [0, 0, 109]
         }
     ],
     "dependencies": [
         {
             "uuid": "d484aa26-71ba-4eca-99a8-8becafc28b8f",
-            "version": [0, 0, 108]
+            "version": [0, 0, 109]
         }
     ],
     "metadata": {

@@ -1,0 +1,34 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "Prefabs for Pillager (buildings for Org Pillagers)",
+        "description": "Saved structures, houses, & buildings for Organized Pillagers pack. By MRxSIR.",
+        "uuid": "94e7d1d9-90b2-4377-941a-55964efdb86f",
+        "min_engine_version": [
+            1,
+            20,
+            40
+        ],
+        "version": [
+            1,
+            0,
+            0
+        ]
+    },
+    "modules": [
+        {
+            "type": "data",
+            "uuid": "3e2fbed6-d609-496f-9956-0706949824af",
+            "version": [
+                1,
+                0,
+                0
+            ]
+        }
+    ],
+    "metadata": {
+        "authors": [
+            "MRxSIR"
+        ]
+    }
+}
