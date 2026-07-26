@@ -70,16 +70,23 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     }
 });
 
+const settlementSearches = new Set();
+
 /* ************ The main driver function ************ */
 async function find_spot_for_settlement(sourceEntity) {
+    if (!isUsableEntity(sourceEntity)) return false;
+    if (settlementSearches.has(sourceEntity.id)) return false;
+
+    settlementSearches.add(sourceEntity.id);
+
     // get name/identifier for printouts
     const name = sourceEntity.name || sourceEntity.typeId;
     print("...");   //for debug readability
     
     // get location of sourceEntity
-    const x = sourceEntity.location.x;
-    const y = sourceEntity.location.y;
-    const z = sourceEntity.location.z;
+    const x = Math.round(sourceEntity.location.x);
+    const y = Math.round(sourceEntity.location.y);
+    const z = Math.round(sourceEntity.location.z);
     const dimension = sourceEntity.dimension;
 
 
@@ -89,10 +96,22 @@ async function find_spot_for_settlement(sourceEntity) {
 
     while (!good_spot && attempts < 10) {
         print("§e" + name + " did not find a suitable area. Attempt stroll away from it.");
-        await randomStrollToNewSpot(sourceEntity, x, y, z);
+        
+        const didFinishStroll = await randomStrollToNewSpot(sourceEntity, x, y, z);
+        if (!didFinishStroll) return false;
+        // the only reason this would return false is if the sourceEntity became invalid.
 
         if (await strolledFarEnough(sourceEntity, x, y, z)) {
-            if (await is_suitable_area(dimension, x, y, z, name)) {
+            let current = sourceEntity.location;
+
+            if (await is_suitable_area(
+                    current.dimension,
+                    current.x,
+                    current.y,
+                    current.z, 
+                    name
+                )
+            ) {
                 good_spot = true;
                 break;
             }
@@ -125,6 +144,19 @@ async function find_spot_for_settlement(sourceEntity) {
     print("§a" + name + " found a suitable area at " + new_x + " " + new_y + " " + new_z + ".");
 
     return true;
+}
+
+
+function isUsableEntity(entity) {
+    const usable = entity?.isValid === true;
+    if (!usable) {
+        try {
+            print("§c!! Source entity unusable. Cannot execute random stroll.");
+        } catch (e) {
+            // ignore printing errors
+        }
+    }
+    return usable;
 }
 
 
@@ -350,6 +382,8 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     // Note: pillager will keep periodically randomly strolling until default stroll behavior restored.
     // Starting location is passed as x, y, z.
     print("§bRunning randomStrollToNewSpot()"); //debug msg
+
+    if (!isUsableEntity(sourceEntity)) return false;
 
     // Remove and re-add random stroll to prompt new random stroll.
     sourceEntity.triggerEvent("remove_random_stroll");

@@ -916,7 +916,7 @@
         "queue_command": {"command": [
           "say §eRefresh avoid behavior event.",
           // don't run if settled pillagers or players in range
-          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] unless entity @e[family=player,family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] unless entity @e[family=player,tag=!pillager_exempt,r=260] unless entity @e[family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
           
           // don't run if settled pillagers in range
           "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s escaped_player_or_villager",
