@@ -219,14 +219,24 @@
         }
       },
 
-      //using attack targeting to make our pillager move to settlement
+
       "move_to_settled_pillagers": {
-        //********** Might need to use this \/  \/ ***********
-        // "minecraft:behavior.move_towards_target": {
-        //   "priority": 2,
-        //   "within_radius": 20
-        // },
+        /*
+        Using attack targeting to get pillager to move toward settled pillagers.
+        
+        Note:
+        normal difficulty → active_hostility may be installed
+        settlement found → calm + remove active_hostility
+                         → acquire only settled/governor targets
+                         → move_towards_target walks to that target
+        */
+        "minecraft:behavior.move_towards_target": {  //still unsure if this is needed
+          "priority": 3,
+          "speed_multiplier": 1.1,
+          "within_radius": 20  // how close to get to target
+        },
         "minecraft:behavior.nearest_attackable_target": {
+          "priority": 2,  // temp added, maybe keep?
           "attack_owner": false,
           "must_reach": false,
           "must_see": false,
@@ -291,6 +301,7 @@
           "time": 6,
           "looping": true,
           "time_down_event": {
+            // this event keeps the behavior in the foreground, otherwise it would stop
             "event": "refresh_avoid_behavior",
             "target": "self"
           }
@@ -720,50 +731,9 @@
           "max_dist": 64
         }
       },
-      "minecraft:behavior.nearest_attackable_target": {
-        "priority": 2,
-        "must_see": true,
-        "reselect_targets": true,
-        "within_radius": 16.0,
-        "entity_types": [
-          {
-            "filters": {
-              "any_of": [
-                {
-                  "test": "is_family",
-                  "subject": "other",
-                  "value": "player"
-                },
-                {
-                  "test": "is_family",
-                  "subject": "other",
-                  "value": "irongolem"
-                },
-                {
-                  "test": "is_family",
-                  "subject": "other",
-                  "value": "wandering_trader"
-                }
-              ]
-            },
-            "max_dist": 16
-          },
-          {
-            "filters": {
-              "all_of": [
-                {"test": "is_family", "subject": "other", "value": "villager"},
-                {
-                  "test": "has_component",
-                  "subject": "other",
-                  "operator": "!=",
-                  "value": "minecraft:is_baby"
-                }
-              ]
-            },
-            "max_dist": 16
-          }
-        ]
-      },
+
+      // "minecraft:behavior.nearest_attackable_target": {...}
+
       "minecraft:behavior.equip_item": {
         "priority": 3
       },
@@ -895,8 +865,16 @@
       },
 
       "move_to_settled_pillagers": {
+        /* Minecraft calm removes attack mechanisms, which have difficulty sensors. 
+        Therefore, difficulty changes won't be detected while the pillager is traveling.
+        */
         "trigger": "minecraft:calm",
-        "remove": {"component_groups": ["avoid_players_and_villagers"]},
+        "remove": {
+          "component_groups": [
+            "avoid_players_and_villagers",
+            "active_hostility"
+          ]
+        },
         "add": {"component_groups": ["move_to_settled_pillagers"]},
         "queue_command": {
           "command": "say §eMoving to settled pillagers."   //for debug
@@ -906,19 +884,24 @@
       "avoid_players_and_villagers": {
         "remove": {"component_groups": ["move_to_settled_pillagers"]},
         "add": {"component_groups": ["avoid_players_and_villagers"]},
-        // - comes with timer to trigger refresh avoid behavior (below)
+        // - comes with timer to trigger refresh (keep alive) avoid behavior (below)
         "queue_command": {
           "command": "say §eAvoiding players and villagers."   //for debug
         }
       },
 
+      /* 
+      This event keeps the avoid behavior in the foreground, otherwise it would stop. 
+      It also checks for nearby settled pillagers and removes the avoid behavior if found
+      to prioritize moving to the settled pillager.
+      */
       "refresh_avoid_behavior": {
         "queue_command": {"command": [
-          "say §eRefresh avoid behavior event.",
-          // don't run if settled pillagers or players in range
+          "say §7avoid behavior keepalive.",
+          // run unless settled pillagers or players in range
           "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] unless entity @e[family=player,tag=!pillager_exempt,r=260] unless entity @e[family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
           
-          // don't run if settled pillagers in range
+          // run unless settled pillagers in range
           "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s escaped_player_or_villager",
 
           // run if settled pillagers in range
