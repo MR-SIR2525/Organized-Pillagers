@@ -885,7 +885,7 @@
       "check_for_nearby_settlements": {
         "queue_command": {
           "command": [
-            "msg @a[r=1500] §eChecking for nearby settlements.",
+            "say §eChecking for nearby settlements.",
             // if settled pillagers nearby, move to them
             "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s move_to_settled_pillagers",
             // if not settled pillagers nearby, move away from players and villagers
@@ -899,7 +899,7 @@
         "remove": {"component_groups": ["avoid_players_and_villagers"]},
         "add": {"component_groups": ["move_to_settled_pillagers"]},
         "queue_command": {
-          "command": "msg @a[r=1500] §eMoving to settled pillagers."   //for debug
+          "command": "say §eMoving to settled pillagers."   //for debug
         }
       },
 
@@ -908,13 +908,13 @@
         "add": {"component_groups": ["avoid_players_and_villagers"]},
         // - comes with timer to trigger refresh avoid behavior (below)
         "queue_command": {
-          "command": "msg @a[r=1500] §eAvoiding players and villagers."   //for debug
+          "command": "say §eAvoiding players and villagers."   //for debug
         }
       },
 
       "refresh_avoid_behavior": {
         "queue_command": {"command": [
-          "msg @a[r=1500] §eRefresh avoid behavior event.",
+          "say §eRefresh avoid behavior event.",
           // don't run if settled pillagers or players in range
           "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] unless entity @e[family=player,family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
           
@@ -929,7 +929,7 @@
       "stop_avoiding_players_and_villagers": {
         "remove": {"component_groups": ["avoid_players_and_villagers"]},
         "queue_command": {
-          "command": "msg @a[r=1500] §e No longer avoiding players and villagers."   //for debug
+          "command": "say §e No longer avoiding players and villagers."   //for debug
         }
       },
 
@@ -939,7 +939,7 @@
         //all players/villagers, we move on to initiating a new settlement.
         "queue_command": {
           "command": [
-            "msg @a[r=1500] §eEscaped a player or villager.",
+            "say §eEscaped a player or villager.",
             //if escaped all players/villagers, look for spot to create new settlement
             "execute as @s at @s unless entity @e[r=260,type=player,tag=!pillager_exempt] unless entity @e[r=255,family=villager,tag=!pillager_exempt] run event entity @s find_spot_to_create_settlement"
             //else, do nothing (continue avoidance)
@@ -955,7 +955,7 @@
             },
             "queue_command": {
               "command": [
-                "msg @a[r=1500] §eFinding a spot to create a settlement.",
+                "say §eFinding a spot to create a settlement.",
                 "tag @s add trying_to_create_settlement"
               ]
             },
@@ -979,37 +979,37 @@
 
       "move_to_random_block": {
         "add": {"component_groups": ["move_to_random_block"]},
-        "queue_command": {"command": "msg @a[r=1500] §eMoving to random block."}  //for debug
+        "queue_command": {"command": "say §eMoving to random block."}  //for debug
       },
 
       "random_stroll": {
         "add": {"component_groups": ["random_stroll"]},
-        "queue_command": {"command": "msg @a[r=1500] §eRandom stroll behavior triggered."}  //for debug
+        "queue_command": {"command": "say §eRandom stroll behavior triggered."}  //for debug
       },
 
       "finished_random_stroll": {
         "set_property": {
           "var:finished_random_stroll": true
         },
-        "queue_command": {"command": "msg @a[r=1500] §eFinished random stroll."}  //for debug
+        "queue_command": {"command": "say §eFinished random stroll."}  //for debug
       },
 
       "finished_random_stroll_false": {
         "set_property": {
           "var:finished_random_stroll": false
         },
-        "queue_command": {"command": "msg @a[r=1500] §eReset 'finished_random_stroll' to false."}  //for debug
+        "queue_command": {"command": "say §eReset 'finished_random_stroll' to false."}  //for debug
       },
 
       "remove_move_to_random_block": {
         "remove": {"component_groups": ["move_to_random_block"]},
-        "queue_command": {"command": "msg @a[r=1500] §eNo longer moving to random block."}  //for debug
+        "queue_command": {"command": "say §eNo longer moving to random block."}  //for debug
       },
 
       "remove_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
         "trigger": "finished_random_stroll_false",
-        "queue_command": {"command": "msg @a[r=1500] §eStopping random stroll."}  //for debug
+        "queue_command": {"command": "say §eStopping random stroll."}  //for debug
       },
 
       "restore_default_random_stroll": {
@@ -1019,7 +1019,7 @@
           },
           {
             "add": {"component_groups": ["default_random_stroll"]},
-            "queue_command": {"command": "msg @a[r=1500] §eRestoring default random stroll behavior."}  //for debug
+            "queue_command": {"command": "say §eRestoring default random stroll behavior."}  //for debug
           }
         ]
       },
@@ -1028,36 +1028,36 @@
       "timeout_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
         "trigger": "find_spot_to_create_settlement",
-        "queue_command": {"command": "msg @a[r=1500] §eTimed out random stroll."}  //for debug
+        "queue_command": {"command": "say §eTimed out random stroll."}  //for debug
       },
 
       // not used currently
       "stop_timeout_random_stroll": {
         "remove": {"component_groups": ["random_stroll"]},
         "trigger": "find_spot_to_create_settlement",
-        "queue_command": {"command": "msg @a[r=1500] §eTimed out random stroll."}  //for debug
+        "queue_command": {"command": "say §eTimed out random stroll."}  //for debug
       },
       // --------- end of script stuff ^
 
       "governor_pillager": {
         "add": {"component_groups": ["governor_pillager"]},
-        "queue_command": {"command": "msg @a[r=1500] §eNow a governor pillager."}  //for debug
+        "queue_command": {"command": "say §eNow a governor pillager."}  //for debug
       },
 
       "demote_governor_pillager": {
         "remove": {"component_groups": ["governor_pillager"]},
         "trigger": "belongs_to_settlement",
-        "queue_command": {"command": "msg @a[r=1500] §eDemoted from governor."}  //for debug
+        "queue_command": {"command": "say §eDemoted from governor."}  //for debug
       },
 
       "belongs_to_settlement": {
         "add": {"component_groups": ["belongs_to_settlement"]},
-        "queue_command": {"command": "msg @a[r=1500] §eBelongs to a settlement."}  //for debug
+        "queue_command": {"command": "say §eBelongs to a settlement."}  //for debug
       },
 
       "remove_belongs_to_settlement": {
         "remove": {"component_groups": ["belongs_to_settlement"]},
-        "queue_command": {"command": "msg @a[r=1500] §eNo longer belongs to a settlement."}  //for debug
+        "queue_command": {"command": "say §eNo longer belongs to a settlement."}  //for debug
       },
 
       "target_acquired_during_search": {
@@ -1112,14 +1112,14 @@
       "add_active_hostility": {
         "add": {"component_groups": ["active_hostility"]},
         "queue_command": {
-          "command": "msg @a[r=1500] §eable to look for targets."   //for debug
+          "command": "say §eable to look for targets."   //for debug
         }
       },
 
       "remove_active_hostility": {
         "remove": {"component_groups": ["active_hostility"]},
         "queue_command": {
-          "command": "msg @a[r=1500] §eno longer looking for targets."   //for debug
+          "command": "say §eno longer looking for targets."   //for debug
         }
       },
 
@@ -1147,22 +1147,22 @@
 
       "persistence_on": {
         "add": {"component_groups": ["persistence"]},
-        "queue_command": {"command": "msg @a[r=1500] §ePersistence on."}  //for debug
+        "queue_command": {"command": "say §ePersistence on."}  //for debug
       },
 
       "persistence_off": {
         "remove": {"component_groups": ["persistence"]},
-        "queue_command": {"command": "msg @a[r=1500] §ePersistence off."} //for debug
+        "queue_command": {"command": "say §ePersistence off."} //for debug
       },
 
       "ticks_world_on": {
         "add": {"component_groups": ["ticks_world"]},
-        "queue_command": {"command": "msg @a[r=1500] §eTicks world on."}  //for debug
+        "queue_command": {"command": "say §eTicks world on."}  //for debug
       },
 
       "ticks_world_off": {
         "remove": {"component_groups": ["ticks_world"]},
-        "queue_command": {"command": "msg @a[r=1500] §eTicks world off."}  //for debug
+        "queue_command": {"command": "say §eTicks world off."}  //for debug
       },
 
       "minecraft:promote_to_illager_captain": {
