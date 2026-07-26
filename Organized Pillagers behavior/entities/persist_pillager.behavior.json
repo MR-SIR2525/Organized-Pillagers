@@ -857,12 +857,23 @@
           "command": [
             "say §eChecking for nearby settlements.",
             // if settled pillagers nearby, move to them
-            "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s move_to_settled_pillagers",
+            "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s found_nearby_settlement",
             // if not settled pillagers nearby, move away from players and villagers
-            "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s avoid_players_and_villagers"
+            "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s failed_to_find_settlement"
           ]
         }
       },
+
+      "found_nearby_settlement": {
+        "queue_command": {"command": "say §eFound settled pillagers nearby."},
+        "trigger": "move_to_settled_pillagers"
+      },
+
+      "failed_to_find_settlement": {
+        "queue_command": {"command": "say §eFailed to find settled pillagers nearby."},
+        "trigger": "avoid_players_and_villagers"
+      },
+
 
       "move_to_settled_pillagers": {
         /* Minecraft calm removes attack mechanisms, which have difficulty sensors. 
@@ -879,6 +890,17 @@
         "queue_command": {
           "command": "say §eMoving to settled pillagers."   //for debug
         }
+      },
+
+      "remove_move_to_settled_pillagers": {
+        "remove": {"component_groups": ["move_to_settled_pillagers"]},
+        "queue_command": {
+          "command": "say §eNo longer moving to settled pillagers."   //for debug
+        }
+      },
+
+      "stop_move_to_settled_pillagers": {   // alias
+        "trigger": "remove_move_to_settled_pillagers"
       },
 
       "avoid_players_and_villagers": {
@@ -1046,6 +1068,9 @@
       "target_acquired_during_search": {
         "sequence": [
           {
+            "queue_command": {"command": "say Target aquired during search..."}
+          },
+          {
             "filters": {
               "any_of": [
                 {"test": "is_family", "subject": "target", "value": "settled_pillager"},
@@ -1053,7 +1078,8 @@
               ]
             },
             "remove": {"component_groups": ["minecraft:melee_attack", "minecraft:ranged_attack"]},
-            "trigger": "stop_avoiding_players_and_villagers"
+            "trigger": "stop_avoiding_players_and_villagers",
+            "queue_command": {"command": "say Target is a settled or governor pillager."}
           },
           {
             //got attacked, need to defend self
@@ -1063,7 +1089,8 @@
                 {"test": "is_family", "subject": "target", "value": "governor_pillager"}
               ]
             },
-            "add": {"component_groups": ["minecraft:ranged_attack"]}
+            "add": {"component_groups": ["minecraft:ranged_attack"]},
+            "queue_command": {"command": "say Target is not a settled or governor pillager."}
           }
         ]
       },
