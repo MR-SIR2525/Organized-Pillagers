@@ -255,7 +255,11 @@
             }
           ]
         },
-        "minecraft:on_target_acquired": "target_acquired_during_search",
+        "minecraft:on_target_acquired": {
+          "event": "target_acquired_during_search",
+          "target": "self"
+        },
+
         "minecraft:timer": {
           "time": 10,
           "looping": true,
