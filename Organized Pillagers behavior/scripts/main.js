@@ -1,5 +1,8 @@
 import { world, system } from "@minecraft/server";
 
+import { placeSettlementMarker } from "./settlementBuilder.js";
+
+
 // /scriptevent wiki:test Hello World
 system.afterEvents.scriptEventReceive.subscribe((event) => {
     const {
@@ -458,7 +461,7 @@ function isBelowForestDensity(dimension, x, y, z, radius) {
 }
 
 
-/* ********* Utilities ********* */
+/* ******************* Utilities ******************* */
 
 function print(message) {
     world.sendMessage(`§0Script: §f${message}`);

@@ -21,6 +21,14 @@
             "version": [0, 0, 109],
             "language": "javascript",
             "entry": "scripts/main.js"
+        },
+        {
+            "type": "script",
+            "description": "Settlement builder",
+            "uuid": "f1e3c8a0-4b2d-4f5e-9c6b-1d2e3f4a5b6c",
+            "version": [0, 0, 109],
+            "language": "javascript",
+            "entry": "scripts/settlementBuilder.js"
         }
     ],
     "dependencies": [
