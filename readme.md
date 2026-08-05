@@ -1,3 +1,11 @@
+# Organized Pillagers addon
+
+**In-development** addon for Minecraft Bedrock edition to make pillagers more organized, interesting, and alive.
+
+Pillagers will build and expand settlements around the world, complete with houses and other structures. As their numbers increase, it will be more difficult to deter their raids and looting. If left unchecked, settlements can become ridiculously large and hard for players to conquer.
+
+---- 
+
 ## TODO:
 - **Logic find spot for settlement failing:** 
   - Stroll around...  timer, check again...  x failed attempts puts them in wandering "sleep mode" where searches become less frequent after each fail. Example, every 60 seconds, then every 5 min, etc.
