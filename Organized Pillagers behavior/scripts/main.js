@@ -106,9 +106,10 @@ async function find_spot_for_settlement(sourceEntity) {
 
         if (await strolledFarEnough(sourceEntity, x, y, z)) {
             let current = sourceEntity.location;
+            let current_dimension = sourceEntity.dimension;
 
             if (await is_suitable_area(
-                    current.dimension,
+                    current_dimension,
                     current.x,
                     current.y,
                     current.z, 
