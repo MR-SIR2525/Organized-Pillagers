@@ -401,7 +401,7 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
 
     // Remove and re-add random stroll to prompt new random stroll.
     sourceEntity.triggerEvent("remove_random_stroll");
-    await system.waitTicks(10);
+    await system.waitTicks(20);
     if (!isUsableEntity(sourceEntity)) return false;
 
     sourceEntity.triggerEvent("random_stroll");
