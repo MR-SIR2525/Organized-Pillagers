@@ -38,7 +38,7 @@
         },
         {
             "module_name": "@minecraft/server",
-            "version": "1.16.0"
+            "version": "2.8.0"
         },
         {
             "uuid": "94e7d1d9-90b2-4377-941a-55964efdb86f",
