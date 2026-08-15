@@ -1,6 +1,6 @@
 import { world, system } from "@minecraft/server";
 
-import { placeSettlementMarker } from "./settlementBuilder.js";
+import { registerSettlement } from "./settlementRegistry.js";
 
 
 // /scriptevent wiki:test Hello World
@@ -82,72 +82,80 @@ async function find_spot_for_settlement(sourceEntity) {
 
     settlementSearches.add(sourceEntity.id);
 
-    // get name/identifier for printouts
-    const name = sourceEntity.name || sourceEntity.typeId;
-    print("...");   //for debug readability
-    
-    // get location of sourceEntity
-    const x = Math.round(sourceEntity.location.x);
-    const y = Math.round(sourceEntity.location.y);
-    const z = Math.round(sourceEntity.location.z);
-    const dimension = sourceEntity.dimension;
+    try {
+        // Get name/identifier for printouts.
+        const name = sourceEntity.name || sourceEntity.typeId;
+        print("...");   // For debug readability.
 
+        // Start checking around the founder's current block position.
+        const x = Math.round(sourceEntity.location.x);
+        const y = Math.round(sourceEntity.location.y);
+        const z = Math.round(sourceEntity.location.z);
+        const dimension = sourceEntity.dimension;
 
-    //start checking around self for suitable area
-    let good_spot = await is_suitable_area(dimension, x, y, z, name);
-    let attempts = 0;
+        let good_spot = await is_suitable_area(dimension, x, y, z, name);
+        let attempts = 0;
 
-    while (!good_spot && attempts < 10) {
-        print("§e" + name + " did not find a suitable area. Attempt stroll away from it.");
-        
-        const didFinishStroll = await randomStrollToNewSpot(sourceEntity, x, y, z);
-        if (!didFinishStroll) return false;
-        // the only reason this would return false is if the sourceEntity became invalid.
+        while (!good_spot && attempts < 10) {
+            print("§e" + name + " did not find a suitable area. Attempt stroll away from it.");
 
-        if (await strolledFarEnough(sourceEntity, x, y, z)) {
-            let current = sourceEntity.location;
-            let current_dimension = sourceEntity.dimension;
+            const didFinishStroll = await randomStrollToNewSpot(sourceEntity, x, y, z);
+            // A false result means the founder became invalid while searching.
+            if (!didFinishStroll) return false;
 
-            if (await is_suitable_area(
-                    current_dimension,
+            if (await strolledFarEnough(sourceEntity, x, y, z)) {
+                const current = sourceEntity.location;
+                const currentDimension = sourceEntity.dimension;
+
+                if (await is_suitable_area(
+                    currentDimension,
                     current.x,
                     current.y,
-                    current.z, 
+                    current.z,
                     name
-                )
-            ) {
-                good_spot = true;
-                break;
+                )) {
+                    good_spot = true;
+                    break;
+                }
             }
+            else {
+                print("§e" + name + " did not stroll far enough. Try again.");
+            }
+
+            attempts += 1;
+            print("§eAttempt " + attempts);
         }
-        else {
-            print("§e" + name + " did not stroll far enough. Try again.");
+        restore_default_random_stroll(sourceEntity);
+
+        if (!good_spot) {
+            print("§c" + name + " could not find a suitable area within 10 attempts.");
+            return false;
         }
 
-        attempts += 1;
-        print("§eAttempt " + attempts);
+        // We have a good spot!
+        // The rounded, approved search position is the permanent settlement center.
+        const center = {
+            x: Math.round(sourceEntity.location.x),
+            y: Math.round(sourceEntity.location.y),
+            z: Math.round(sourceEntity.location.z),
+        };
+        const settlement = registerSettlement(world, sourceEntity, {
+            dimensionId: sourceEntity.dimension.id,
+            center,
+        });
+
+        // Keep the existing entity properties during the transition to the registry.
+        sourceEntity.setProperty("var:x", center.x);
+        sourceEntity.setProperty("var:y", center.y);
+        sourceEntity.setProperty("var:z", center.z);
+        print("§a" + name + " registered settlement #" + settlement.id + " at "
+            + center.x + " " + center.y + " " + center.z + ".");
+
+        return true;
+    } finally {
+        // Always release the in-memory guard, including after failures or thrown errors.
+        settlementSearches.delete(sourceEntity.id);
     }
-    restore_default_random_stroll(sourceEntity);
-
-    if (!good_spot) {
-        print("§c" + name + " could not find a suitable area within 10 attempts.");
-        // maybe Pillager snoozes the search for 20 min or something, otherwise just give up?
-        // become normal pilager and allow self to despawn?
-        return false;
-    }
-
-    // We have a good spot! Get coords (rounded)
-    let new_x = Math.round(sourceEntity.location.x);
-    let new_y = Math.round(sourceEntity.location.y);
-    let new_z = Math.round(sourceEntity.location.z);
-
-    // Store coords to Pillager
-    sourceEntity.setProperty("var:x", new_x);
-    sourceEntity.setProperty("var:y", new_y);
-    sourceEntity.setProperty("var:z", new_z);
-    print("§a" + name + " found a suitable area at " + new_x + " " + new_y + " " + new_z + ".");
-
-    return true;
 }
 
 
