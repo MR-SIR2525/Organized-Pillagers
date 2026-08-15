@@ -1,3 +1,15 @@
+### 2026-08-15 — `settlement-builder` branch:
+- migrated the `@minecraft/server` Script API dependency from `1.16.0` to `2.8.0`, matching the installed project package
+- added a persistent, world-owned settlement registry with stable integer settlement IDs and permanent dimension-aware center coordinates
+- stores each settlement independently as `op:settlement_<id>` and retains `op:settlementNextId` for ID allocation
+- links a founding persistent pillager to its settlement with `op:settlementId`; repeated founder events return the existing settlement instead of creating a duplicate
+- validates non-empty dimension IDs and integer block-grid center coordinates before persistence
+- prevents accidental overwrite if a record already exists at the next allocated ID
+- preserves the existing `var:x`, `var:y`, and `var:z` founder properties while moving toward the formal registry
+- releases the in-memory settlement-search guard after success, failure, or a thrown error
+- added Node-based tests covering persistence, duplicate prevention, ID continuation, validation, and collision protection
+- no physical center marker, roads, buildings, palace system, orientation, or settlement-activity model added yet
+
 ### 12/6/24:
 - Update script dependency from 1.13.0 to 1.16.0
 - manifests to v0.0.107
