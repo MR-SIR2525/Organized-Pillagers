@@ -231,12 +231,12 @@
                          → move_towards_target walks to that target
         */
         "minecraft:behavior.move_towards_target": {  //still unsure if this is needed
-          "priority": 3,
+          "priority": 2,
           "speed_multiplier": 1.1,
-          "within_radius": 20  // how close to get to target
+          "within_radius": 5  // how close to get to target
         },
         "minecraft:behavior.nearest_attackable_target": {
-          "priority": 2,  // temp added, maybe keep?
+          "priority": 3,  // temp added, maybe keep?
           "attack_owner": false,
           "must_reach": false,
           "must_see": false,
