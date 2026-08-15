@@ -220,7 +220,7 @@
       },
 
 
-      "move_to_settled_pillagers": {
+      "OLD__move_to_settled_pillagers": {
         /*
         Using attack targeting to get pillager to move toward settled pillagers.
         
@@ -269,6 +269,23 @@
           }
         }
       },
+
+      // testing alternative to the nearest attackable target behavior
+      "move_to_settled_pillagers": {      // "follow_settled_pillager": {
+        "minecraft:behavior.follow_mob": {
+          "priority": 2,
+          "search_range": 64,
+          "stop_distance": 8,
+          "speed_multiplier": 1.1,
+          "filters": {
+            "any_of": [
+              {"test": "is_family", "subject": "other", "value": "settled_pillager"},
+              {"test": "is_family", "subject": "other", "value": "governor_pillager"}
+            ]
+          }
+        }
+      },
+
 
       "avoid_players_and_villagers": {
         "minecraft:behavior.avoid_mob_type": {
@@ -886,7 +903,7 @@
       },
 
 
-      "move_to_settled_pillagers": {
+      "OLD__move_to_settled_pillagers": {
         /* Minecraft calm removes attack mechanisms, which have difficulty sensors. 
         Therefore, difficulty changes won't be detected while the pillager is traveling.
         */
@@ -901,6 +918,11 @@
         "queue_command": {
           "command": "say §eMoving to settled pillagers."   //for debug
         }
+      },
+
+      "move_to_settled_pillagers": {
+        "remove": {"component_groups": ["avoid_players_and_villagers"]},
+        "add": {"component_groups": ["move_to_settled_pillagers"]}
       },
 
       "remove_move_to_settled_pillagers": {
