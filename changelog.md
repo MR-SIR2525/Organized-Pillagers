@@ -8,6 +8,8 @@
 - preserves the existing `var:x`, `var:y`, and `var:z` founder properties while moving toward the formal registry
 - releases the in-memory settlement-search guard after success, failure, or a thrown error
 - added Node-based tests covering persistence, duplicate prevention, ID continuation, validation, and collision protection
+- added registry-level settlement deletion that preserves retired IDs and clears a matching loaded founder link
+- documented the deferred cleanup required for unloaded entities retaining a deleted settlement ID
 - no physical center marker, roads, buildings, palace system, orientation, or settlement-activity model added yet
 
 ### 12/6/24:

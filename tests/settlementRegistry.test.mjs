@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { registerSettlement } from "../Organized Pillagers behavior/scripts/settlementRegistry.js";
+import { deleteSettlement, registerSettlement } from "../Organized Pillagers behavior/scripts/settlementRegistry.js";
 
 function createDynamicPropertyStore(initialProperties = {}) {
     const properties = new Map(Object.entries(initialProperties));
@@ -110,4 +110,35 @@ test("registerSettlement refuses to overwrite an existing record at the next ID"
         center: { x: 1, y: 70, z: 1 },
     }), /already exists/);
     assert.equal(founder.getDynamicProperty("op:settlementId"), undefined);
+});
+
+test("deleteSettlement removes one record without reusing its ID and clears its founder link", () => {
+    const settlement = {
+        id: 2,
+        dimensionId: "minecraft:overworld",
+        center: { x: 10, y: 71, z: 20 },
+    };
+    const world = createDynamicPropertyStore({
+        "op:settlementNextId": 3,
+        "op:settlement_2": JSON.stringify(settlement),
+    });
+    const founder = createDynamicPropertyStore({ "op:settlementId": 2 });
+
+    const deletedSettlement = deleteSettlement(world, 2, founder);
+
+    assert.deepEqual(deletedSettlement, settlement);
+    assert.equal(world.getDynamicProperty("op:settlement_2"), undefined);
+    assert.equal(world.getDynamicProperty("op:settlementNextId"), 3);
+    assert.equal(founder.getDynamicProperty("op:settlementId"), undefined);
+});
+
+test("deleteSettlement leaves an unrelated founder link unchanged when the record is absent", () => {
+    const world = createDynamicPropertyStore({ "op:settlementNextId": 3 });
+    const founder = createDynamicPropertyStore({ "op:settlementId": 2 });
+
+    const deletedSettlement = deleteSettlement(world, 1, founder);
+
+    assert.equal(deletedSettlement, undefined);
+    assert.equal(world.getDynamicProperty("op:settlementNextId"), 3);
+    assert.equal(founder.getDynamicProperty("op:settlementId"), 2);
 });

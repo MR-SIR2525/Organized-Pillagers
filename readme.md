@@ -8,6 +8,11 @@
   - place marker entity? Store coords in governor pillager entity somehow (tag, property, or scoreboard)?
   - "build" first building of settlement (town square too?)
 
+- **Settlement deletion cleanup:**
+  - deleting a settlement removes its world registry record and can clear the link on a loaded founder
+  - later, handle unloaded entities that still carry `op:settlementId` for a deleted settlement when they load or otherwise rejoin settlement logic
+  - decide whether cleanup should clear the stale link, demote/reassign the pillager, or apply a dedicated "orphaned settlement member" behavior
+
 
 ## Notes
 

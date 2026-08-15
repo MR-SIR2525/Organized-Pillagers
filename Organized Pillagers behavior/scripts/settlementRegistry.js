@@ -134,3 +134,37 @@ export function registerSettlement(world, founder, { dimensionId, center }) {
 
     return settlement;
 }
+
+/**
+ * Deletes one settlement record without changing the next-ID counter.
+ *
+ * Settlement IDs are never reused: leaving `op:settlementNextId` unchanged preserves stable
+ * references in logs, saved entities, and any later system that records a historical ID. When
+ * the optional founder entity is loaded and linked to this settlement, its convenience link is
+ * cleared as part of the deletion. Callers without that entity can still delete the world record,
+ * but must handle any unloaded or other stale entity links when those entities are encountered.
+ *
+ * @param {World} world The Bedrock world that owns the settlement record.
+ * @param {number} settlementId The positive integer ID of the settlement to delete.
+ * @param {Entity | undefined} founder Optional loaded founder entity to unlink if it matches.
+ * @returns {object | undefined} The deleted record, or undefined when no such record exists.
+ */
+export function deleteSettlement(world, settlementId, founder = undefined) {
+    if (!Number.isInteger(settlementId) || settlementId < 1) {
+        throw new Error("Settlement ID must be a positive integer.");
+    }
+
+    const settlement = loadSettlement(world, settlementId);
+    // Deletion is idempotent: a missing record does not alter unrelated world or entity state.
+    if (settlement === undefined) return undefined;
+
+    const propertyId = getSettlementPropertyId(settlementId);
+    world.setDynamicProperty(propertyId, undefined);
+
+    if (founder?.getDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY) === settlementId) {
+        // Only clear the matching link; an entity linked to another settlement is left untouched.
+        founder.setDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY, undefined);
+    }
+
+    return settlement;
+}
