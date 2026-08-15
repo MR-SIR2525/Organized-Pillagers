@@ -100,8 +100,13 @@ async function find_spot_for_settlement(sourceEntity) {
             print("§e" + name + " did not find a suitable area. Attempt stroll away from it.");
 
             const didFinishStroll = await randomStrollToNewSpot(sourceEntity, x, y, z);
-            if (!didFinishStroll) return false;
-            // A false result means the founder became invalid while searching.
+            if (!didFinishStroll) {
+                // A false result means the founder became invalid or the stroll timed out.
+                if (isUsableEntity(sourceEntity)) {
+                    restore_default_random_stroll(sourceEntity);
+                }
+                return false;
+            }
 
             if (await strolledFarEnough(sourceEntity, x, y, z)) {
                 const current = sourceEntity.location;
@@ -397,20 +402,31 @@ async function randomStrollToNewSpot(sourceEntity, x, y, z) {
     // Remove and re-add random stroll to prompt new random stroll.
     sourceEntity.triggerEvent("remove_random_stroll");
     await system.waitTicks(10);
+    if (!isUsableEntity(sourceEntity)) return false;
+
     sourceEntity.triggerEvent("random_stroll");
 
     // Wait for pillager to execute random stroll
     let waitTime = 180;  // 9 seconds in ticks
     let loopCycles = 0;
     await system.waitTicks(waitTime);
-    while (sourceEntity.getProperty("var:finished_random_stroll") === false && loopCycles < 10) 
-    {
+
+    while (loopCycles < 10) {
+        if (!isUsableEntity(sourceEntity)) return false;
+
+        if (sourceEntity.getProperty("var:finished_random_stroll") === true) {
+            print("§bRandom stroll ended; Out of while loop.");
+            return true;
+        }
+
         loopCycles++;
         print("§bWaiting for random stroll to end... (" + loopCycles + "/10)");
         await system.waitTicks(waitTime);
     }
-    print("§bRandom stroll ended; Out of while loop.");
-    return true;
+
+    if (!isUsableEntity(sourceEntity)) return false;
+    print("§eRandom stroll timed out.");
+    return false;
 }
 
 
