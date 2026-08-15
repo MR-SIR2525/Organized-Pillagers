@@ -242,7 +242,7 @@
           "must_see": false,
           "reselect_targets": true,
           "scan_interval": 20,
-          "target_search_height": 350,
+          "target_search_height": 150,
           "entity_types": [
             {
               "filters": {
