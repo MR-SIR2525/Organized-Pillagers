@@ -100,8 +100,8 @@ async function find_spot_for_settlement(sourceEntity) {
             print("§e" + name + " did not find a suitable area. Attempt stroll away from it.");
 
             const didFinishStroll = await randomStrollToNewSpot(sourceEntity, x, y, z);
-            // A false result means the founder became invalid while searching.
             if (!didFinishStroll) return false;
+            // A false result means the founder became invalid while searching.
 
             if (await strolledFarEnough(sourceEntity, x, y, z)) {
                 const current = sourceEntity.location;
@@ -325,12 +325,9 @@ function isFlatEnough(dimension, x, y, z, radius=16, threshold=10, successPercen
         }
     }
     if (successPercentage < 0.0 || successPercentage > 1.0) {
-        if (successPercentage === -1) 
-            successPercentage = 0.70;
-        else {
-            successPercentage = 0.70;
-            print("§cError: Invalid successPercentage " + successPercentage + ". Using 0.70 instead.");
-        }
+        if (successPercentage !== -1) 
+            print("§cError: Invalid successPercentage " + successPercentage + ". Must be between 0.0 and 1.0. Using 0.70 instead.");
+        successPercentage = 0.70;
     }
 
     // for debug
