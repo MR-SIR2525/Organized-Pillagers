@@ -770,10 +770,17 @@
         "is_pushable": true,
         "is_pushable_by_piston": true
       },
+      "minecraft:leashable": {  // for testing purposes, likely delete for prod
+        "can_be_stolen": false,
+        "hard_distance": 8,
+        "max_distance": 15,
+        "soft_distance": 4
+      },
       "minecraft:follow_range": {
         "value": 601
       }
     },
+
 
     "events": {
       "minecraft:entity_spawned": {
