@@ -1,3 +1,12 @@
+### 2026-08-16
+- added persistent-pillager arrival and nearby-settlement joining: a traveller validates a nearby sponsor, receives that sponsor’s `op:settlementId`, stops following, and gains the settled-pillager family
+- added validated settlement lookup and membership-assignment helpers with test coverage that rejects missing records and silent reassignment to another settlement
+- added a manual settlement-registration test path that persists a founder at its current location without suitability scanning and then marks the successful founder as a governor
+- grouped the move-to-settlement events and added debug output for the travel transition
+- updated behavior/resource manifest versions and the watermark to `v0.0.111`
+- quirk/behavior identified about `follow_mob` in a test world: persistent pillagers do not follow a settled/governor pillager while that target is attached to a lead, whether the lead is held by a player or tied to a fence; following resumes after the lead is removed
+
+
 ### 2026-08-15 — `settlement-builder` branch:
 - migrated the `@minecraft/server` Script API dependency from `1.16.0` to `2.8.0`, matching the installed project package
 - added a persistent, world-owned settlement registry with stable integer settlement IDs and permanent dimension-aware center coordinates
@@ -16,6 +25,7 @@
 - added a 15-second settlement proximity refresh while travelling and prevented redundant re-adding of the active follow behavior
 - removed the obsolete `move_towards_target`/`nearest_attackable_target` settlement-travel path and its orphaned target-acquired debug event
 - no physical center marker, roads, buildings, palace system, orientation, or settlement-activity model added yet
+
 
 ### 12/6/24:
 - Update script dependency from 1.13.0 to 1.16.0
