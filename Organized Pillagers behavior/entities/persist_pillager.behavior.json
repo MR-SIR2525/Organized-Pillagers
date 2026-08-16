@@ -879,7 +879,8 @@
 
       "move_to_settled_pillagers": {
         "remove": {"component_groups": ["avoid_players_and_villagers"]},
-        "add": {"component_groups": ["move_to_settled_pillagers"]}
+        "add": {"component_groups": ["move_to_settled_pillagers"]},
+        "queue_command": {"command": "say §eMoving to settled pillager..."}
       },
 
       "request_join_nearby_settlement": {
