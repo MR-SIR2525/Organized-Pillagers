@@ -10,6 +10,11 @@
 - added Node-based tests covering persistence, duplicate prevention, ID continuation, validation, and collision protection
 - added registry-level settlement deletion that preserves retired IDs and clears a matching loaded founder link
 - documented the deferred cleanup required for unloaded entities retaining a deleted settlement ID
+- replaced the persistent pillager’s retired attack-target-based settlement travel with `minecraft:behavior.follow_mob`
+- verified follow travel in the test world through 64-, 128-, 256-, 400-, 550-, and 600-block ranges; observed a practical `follow_mob` limit near 600 blocks
+- set the operational settlement-follow range to 598 blocks as a small buffer below that observed limit
+- added a 15-second settlement proximity refresh while travelling and prevented redundant re-adding of the active follow behavior
+- removed the obsolete `move_towards_target`/`nearest_attackable_target` settlement-travel path and its orphaned target-acquired debug event
 - no physical center marker, roads, buildings, palace system, orientation, or settlement-activity model added yet
 
 ### 12/6/24:
