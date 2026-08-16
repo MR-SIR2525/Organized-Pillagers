@@ -21,6 +21,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     else if (id === "op:join_nearby_settlement" && sourceType === "Entity") {
         joinNearbySettlement(sourceEntity);
     }
+    else if (id === "op:manually_register_settlement" && sourceType === "Entity") {
+        manuallyRegisterSettlement(sourceEntity);
+    }
     else if (id === "op:getFacing") {
         getFacing(sourceEntity);
     }
@@ -211,6 +214,40 @@ async function find_spot_for_settlement(sourceEntity) {
         // Always release the in-memory guard, including after failures or thrown errors.
         settlementSearches.delete(sourceEntity.id);
     }
+}
+
+// Intended for testing and debugging.
+// Registers a settlement at the source entity's current location without any suitability checks.
+function manuallyRegisterSettlement(sourceEntity) {
+    if (!isUsableEntity(sourceEntity)) return false;
+    const name = sourceEntity.name || sourceEntity.typeId;
+
+    try {
+        const center = {
+            x: Math.round(sourceEntity.location.x),
+            y: Math.round(sourceEntity.location.y),
+            z: Math.round(sourceEntity.location.z),
+        };
+        const settlement = registerSettlement(world, sourceEntity, {
+            dimensionId: sourceEntity.dimension.id,
+            center,
+        });
+
+        // Keep the existing entity properties during the transition to the registry.
+        sourceEntity.setProperty("var:x", center.x);
+        sourceEntity.setProperty("var:y", center.y);
+        sourceEntity.setProperty("var:z", center.z);
+        // Mark this entity as the founder only after the registry record and its ID link exist.
+        sourceEntity.triggerEvent("manually_registered_settlement");
+        print("§a" + name + " registered settlement #" + settlement.id + " at "
+            + center.x + " " + center.y + " " + center.z + ".");
+
+        return true;
+    }
+    catch (error) {
+        print("§cFailed to manually register settlement: " + error);
+    }
+    return false;
 }
 
 
