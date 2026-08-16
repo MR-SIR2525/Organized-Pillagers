@@ -220,55 +220,6 @@
       },
 
 
-      "OLD__move_to_settled_pillagers": {
-        /*
-        Using attack targeting to get pillager to move toward settled pillagers.
-        
-        Note:
-        normal difficulty → active_hostility may be installed
-        settlement found → calm + remove active_hostility
-                         → acquire only settled/governor targets
-                         → move_towards_target walks to that target
-        */
-        "minecraft:behavior.move_towards_target": {  //still unsure if this is needed
-          "priority": 2,
-          "speed_multiplier": 1.1,
-          "within_radius": 5  // how close to get to target
-        },
-        "minecraft:behavior.nearest_attackable_target": {
-          "priority": 3,  // temp added, maybe keep?
-          "attack_owner": false,
-          "must_reach": false,
-          "must_see": false,
-          "reselect_targets": true,
-          "scan_interval": 20,
-          "target_search_height": 150,
-          "entity_types": [
-            {
-              "filters": {
-                "any_of": [
-                  {"test": "is_family", "subject": "other", "value": "settled_pillager"},
-                  {"test": "is_family", "subject": "other", "value": "governor_pillager"}
-                ]
-              },
-              "max_dist": 598
-            }
-          ]
-        },
-        "minecraft:on_target_acquired": {
-          "event": "target_acquired_during_search",
-          "target": "self"
-        },
-
-        "minecraft:timer": {
-          "time": 10,
-          "looping": true,
-          "time_down_event": {
-            "event": "check_for_nearby_settlements",
-            "target": "self"
-          }
-        }
-      },
 
       // testing alternative to the nearest attackable target behavior
       "move_to_settled_pillagers": {      // "follow_settled_pillager": {
@@ -918,23 +869,6 @@
       },
 
 
-      "OLD__move_to_settled_pillagers": {
-        /* Minecraft calm removes attack mechanisms, which have difficulty sensors. 
-        Therefore, difficulty changes won't be detected while the pillager is traveling.
-        */
-        "trigger": "minecraft:calm",
-        "remove": {
-          "component_groups": [
-            "avoid_players_and_villagers",
-            "active_hostility"
-          ]
-        },
-        "add": {"component_groups": ["move_to_settled_pillagers"]},
-        "queue_command": {
-          "command": "say §eMoving to settled pillagers."   //for debug
-        }
-      },
-
       "move_to_settled_pillagers": {
         "remove": {"component_groups": ["avoid_players_and_villagers"]},
         "add": {"component_groups": ["move_to_settled_pillagers"]}
@@ -1114,36 +1048,6 @@
       "remove_belongs_to_settlement": {
         "remove": {"component_groups": ["belongs_to_settlement"]},
         "queue_command": {"command": "say §eNo longer belongs to a settlement."}  //for debug
-      },
-
-      "target_acquired_during_search": {
-        "sequence": [
-          {
-            "queue_command": {"command": "say Target aquired during search..."}
-          },
-          {
-            "filters": {
-              "any_of": [
-                {"test": "is_family", "subject": "target", "value": "settled_pillager"},
-                {"test": "is_family", "subject": "target", "value": "governor_pillager"}
-              ]
-            },
-            "remove": {"component_groups": ["minecraft:melee_attack", "minecraft:ranged_attack"]},
-            "trigger": "stop_avoiding_players_and_villagers",
-            "queue_command": {"command": "say Target is a settled or governor pillager."}
-          },
-          {
-            //got attacked, need to defend self
-            "filters": {
-              "none_of": [
-                {"test": "is_family", "subject": "target", "value": "settled_pillager"},
-                {"test": "is_family", "subject": "target", "value": "governor_pillager"}
-              ]
-            },
-            "add": {"component_groups": ["minecraft:ranged_attack"]},
-            "queue_command": {"command": "say Target is not a settled or governor pillager."}
-          }
-        ]
       },
 
       "peaceful": {
