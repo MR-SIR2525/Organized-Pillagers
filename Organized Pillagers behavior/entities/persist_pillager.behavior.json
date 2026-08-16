@@ -883,6 +883,18 @@
         "queue_command": {"command": "say §eMoving to settled pillager..."}
       },
 
+      "remove_move_to_settled_pillagers": {
+        "remove": {"component_groups": ["move_to_settled_pillagers"]},
+        "queue_command": {
+          "command": "say §eNo longer moving to settled pillagers."   //for debug
+        }
+      },
+
+      "stop_move_to_settled_pillagers": {   // alias
+        "trigger": "remove_move_to_settled_pillagers"
+      },
+
+      
       "request_join_nearby_settlement": {
         "sequence": [
           {
@@ -899,15 +911,26 @@
         "queue_command": {"command": "say §aJoined a settlement."}
       },
 
-      "remove_move_to_settled_pillagers": {
-        "remove": {"component_groups": ["move_to_settled_pillagers"]},
+      // For testing
+      "register_settlement_manually": {
+        // Script API must persist op:settlementId before this founder gets a settled family.
         "queue_command": {
-          "command": "say §eNo longer moving to settled pillagers."   //for debug
+          "command": [
+            "say §aRegistering a settlement.",
+            "scriptevent op:manually_register_settlement"
+          ]
         }
       },
 
-      "stop_move_to_settled_pillagers": {   // alias
-        "trigger": "remove_move_to_settled_pillagers"
+      "manually_register_settlement": {   // alias
+        "trigger": "register_settlement_manually"
+      },
+
+      "manually_registered_settlement": {
+        // Mirror the ordinary founder transition after manual registry persistence succeeds.
+        "remove": {"component_groups": ["avoid_players_and_villagers", "move_to_settled_pillagers"]},
+        "trigger": "governor_pillager",
+        "queue_command": {"command": "say §aManually registered settlement founder."}
       },
 
       "avoid_players_and_villagers": {
