@@ -251,7 +251,7 @@
                   {"test": "is_family", "subject": "other", "value": "governor_pillager"}
                 ]
               },
-              "max_dist": 600
+              "max_dist": 598
             }
           ]
         },
@@ -274,8 +274,8 @@
       "move_to_settled_pillagers": {      // "follow_settled_pillager": {
         "minecraft:behavior.follow_mob": {
           "priority": 2,
-          "search_range": 64,
-          "stop_distance": 8,
+          "search_range": 598,
+          "stop_distance": 9,
           "speed_multiplier": 1.1,
           "filters": {
             "any_of": [
@@ -885,16 +885,23 @@
           "command": [
             "say §eChecking for nearby settlements.",
             // if settled pillagers nearby, move to them
-            "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s found_nearby_settlement",
+            "execute as @s at @s if entity @e[family=settled_pillager,r=598,rm=1] run event entity @s found_nearby_settlement",
             // if not settled pillagers nearby, move away from players and villagers
-            "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s failed_to_find_settlement"
+            "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] run event entity @s failed_to_find_settlement"
           ]
         }
       },
 
       "found_nearby_settlement": {
-        "queue_command": {"command": "say §eFound settled pillagers nearby."},
-        "trigger": "move_to_settled_pillagers"
+        "sequence": [
+          {"queue_command": {"command": "say §eFound settled pillagers nearby."}},
+          {
+            // The active follow_mob behavior is the observable marker for this component group.
+            // Do not re-add the group every time its 15-second refresh timer checks the range.
+            "filters": {"test": "has_component", "subject": "self", "operator": "!=", "value": "minecraft:behavior.follow_mob"},
+            "trigger": "move_to_settled_pillagers"
+          }
+        ]
       },
 
       "failed_to_find_settlement": {
@@ -954,13 +961,13 @@
         "queue_command": {"command": [
           "say §7avoid behavior keepalive.",
           // run unless settled pillagers or players in range
-          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] unless entity @e[family=player,tag=!pillager_exempt,r=260] unless entity @e[family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] unless entity @e[family=player,tag=!pillager_exempt,r=260] unless entity @e[family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
           
           // run unless settled pillagers in range
-          "execute as @s at @s unless entity @e[family=settled_pillager,r=600,rm=1] run event entity @s check_for_nearby_players_or_villagers",
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] run event entity @s check_for_nearby_players_or_villagers",
 
           // run if settled pillagers in range
-          "execute as @s at @s if entity @e[family=settled_pillager,r=600,rm=1] run event entity @s move_to_settled_pillagers"
+          "execute as @s at @s if entity @e[family=settled_pillager,r=598,rm=1] run event entity @s move_to_settled_pillagers"
         ]}
       },
 
