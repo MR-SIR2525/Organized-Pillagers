@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { deleteSettlement, registerSettlement } from "../Organized Pillagers behavior/scripts/settlementRegistry.js";
+import {
+    assignSettlementMembership,
+    deleteSettlement,
+    getSettlement,
+    registerSettlement,
+} from "../Organized Pillagers behavior/scripts/settlementRegistry.js";
 
 function createDynamicPropertyStore(initialProperties = {}) {
     const properties = new Map(Object.entries(initialProperties));
@@ -141,4 +146,29 @@ test("deleteSettlement leaves an unrelated founder link unchanged when the recor
     assert.equal(deletedSettlement, undefined);
     assert.equal(world.getDynamicProperty("op:settlementNextId"), 3);
     assert.equal(founder.getDynamicProperty("op:settlementId"), 2);
+});
+
+test("assignSettlementMembership validates the world record and refuses to silently rehome a member", () => {
+    const settlementOne = {
+        id: 1,
+        dimensionId: "minecraft:overworld",
+        center: { x: 10, y: 71, z: 20 },
+    };
+    const settlementTwo = {
+        id: 2,
+        dimensionId: "minecraft:the_nether",
+        center: { x: -30, y: 64, z: 40 },
+    };
+    const world = createDynamicPropertyStore({
+        "op:settlement_1": JSON.stringify(settlementOne),
+        "op:settlement_2": JSON.stringify(settlementTwo),
+    });
+    const traveller = createDynamicPropertyStore();
+
+    assert.deepEqual(getSettlement(world, 1), settlementOne);
+    assert.deepEqual(assignSettlementMembership(world, traveller, 1), settlementOne);
+    assert.equal(traveller.getDynamicProperty("op:settlementId"), 1);
+    assert.deepEqual(assignSettlementMembership(world, traveller, 1), settlementOne);
+    assert.throws(() => assignSettlementMembership(world, traveller, 2), /already belongs to settlement 1/);
+    assert.throws(() => assignSettlementMembership(world, createDynamicPropertyStore(), 3), /does not exist/);
 });

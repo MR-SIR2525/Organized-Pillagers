@@ -11,9 +11,9 @@
 const NEXT_SETTLEMENT_ID_PROPERTY = "op:settlementNextId";
 
 /*
- * This entity property is only a convenience link from the current founder to its settlement.
- * The world record remains authoritative because the founder can die, transform, or unload while
- * its settlement center must remain available to future layout systems.
+ * This entity property is the durable membership link from a founder or later settlement member
+ * to its settlement. The world record remains authoritative because entities can die, transform,
+ * or unload while the settlement center must remain available to future layout systems.
  */
 const FOUNDER_SETTLEMENT_ID_PROPERTY = "op:settlementId";
 
@@ -47,6 +47,57 @@ function loadSettlement(world, id) {
         throw new Error(`Settlement ${id} has an invalid stored shape.`);
     }
 
+    return settlement;
+}
+
+/**
+ * Validates an external settlement ID before it is used as a world-property lookup key.
+ */
+function validateSettlementId(id) {
+    if (!Number.isInteger(id) || id < 1) {
+        throw new Error("Settlement ID must be a positive integer.");
+    }
+}
+
+/**
+ * Loads one authoritative settlement record by ID.
+ *
+ * Callers that need a settlement center must use this lookup instead of duplicating coordinates
+ * on member entities. Undefined means no record exists at that ID; malformed records still fail
+ * loudly in `loadSettlement`.
+ */
+export function getSettlement(world, settlementId) {
+    validateSettlementId(settlementId);
+    return loadSettlement(world, settlementId);
+}
+
+/**
+ * Gives an entity durable membership in an existing settlement.
+ *
+ * Assignment is intentionally one-way for this milestone: a member already linked to another
+ * settlement is rejected rather than silently rehomed. A later explicit transfer/defection system
+ * can make that policy decision deliberately.
+ */
+export function assignSettlementMembership(world, member, settlementId) {
+    const settlement = getSettlement(world, settlementId);
+    if (settlement === undefined) {
+        throw new Error(`Settlement ${settlementId} does not exist.`);
+    }
+
+    const existingSettlementId = member.getDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY);
+    if (existingSettlementId !== undefined) {
+        validateSettlementId(existingSettlementId);
+        if (existingSettlementId === settlementId) return settlement;
+
+        // Reject stale entity data too; never overwrite a membership reference without an explicit
+        // transfer operation, even when its original world record has been deleted.
+        if (getSettlement(world, existingSettlementId) === undefined) {
+            throw new Error(`Member references missing settlement ${existingSettlementId}.`);
+        }
+        throw new Error(`Member already belongs to settlement ${existingSettlementId}.`);
+    }
+
+    member.setDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY, settlementId);
     return settlement;
 }
 

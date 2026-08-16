@@ -1,6 +1,6 @@
 import { world, system } from "@minecraft/server";
 
-import { registerSettlement } from "./settlementRegistry.js";
+import { assignSettlementMembership, registerSettlement } from "./settlementRegistry.js";
 
 
 // /scriptevent wiki:test Hello World
@@ -17,6 +17,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     //what if I use the same id for all p_pillager commands and just change the message?
     if (id === "op:find_spot_for_settlement" && sourceType === "Entity") {
         find_spot_for_settlement(sourceEntity);
+    }
+    else if (id === "op:join_nearby_settlement" && sourceType === "Entity") {
+        joinNearbySettlement(sourceEntity);
     }
     else if (id === "op:getFacing") {
         getFacing(sourceEntity);
@@ -74,6 +77,53 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 });
 
 const settlementSearches = new Set();
+const SETTLEMENT_ARRIVAL_RADIUS = 12;
+
+/**
+ * Joins a travelling persistent pillager to the nearest valid settlement member at arrival.
+ *
+ * Entity JSON can see that a settled pillager is nearby, but cannot read that sponsor's dynamic
+ * properties. The script resolves the sponsor's authoritative settlement ID first, then writes
+ * the same ID to the traveller before the JSON event adds its settled-pillager family.
+ */
+function joinNearbySettlement(traveller) {
+    if (!isUsableEntity(traveller)) return false;
+
+    const origin = traveller.location;
+    const candidates = traveller.dimension.getEntities({
+        families: ["settled_pillager"],
+        location: origin,
+        maxDistance: SETTLEMENT_ARRIVAL_RADIUS,
+    });
+
+    // Query ordering is not a membership rule. Sort explicitly so the closest valid sponsor wins.
+    candidates.sort((left, right) => {
+        const leftLocation = left.location;
+        const rightLocation = right.location;
+        return Math.hypot(leftLocation.x - origin.x, leftLocation.z - origin.z)
+            - Math.hypot(rightLocation.x - origin.x, rightLocation.z - origin.z);
+    });
+
+    for (const sponsor of candidates) {
+        try {
+            const settlementId = sponsor.getDynamicProperty("op:settlementId");
+            if (!Number.isInteger(settlementId)) continue;
+
+            const settlement = assignSettlementMembership(world, traveller, settlementId);
+            traveller.triggerEvent("joined_nearby_settlement");
+
+            print("§a" + (traveller.name || traveller.typeId) + " joined settlement #"
+                + settlement.id + " near " + (sponsor.name || sponsor.typeId) + ".");
+            return true;
+        } catch (error) {
+            // An invalid/stale sponsor must not turn the traveller into a settled pillager.
+            print("§eCould not join nearby settlement: " + error);
+        }
+    }
+
+    print("§eNo valid nearby settlement member was available to join.");
+    return false;
+}
 
 /* ************ The main driver function ************ */
 async function find_spot_for_settlement(sourceEntity) {
