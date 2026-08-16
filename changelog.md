@@ -3,7 +3,7 @@
 - added validated settlement lookup and membership-assignment helpers with test coverage that rejects missing records and silent reassignment to another settlement
 - added a manual settlement-registration test path that persists a founder at its current location without suitability scanning and then marks the successful founder as a governor
 - grouped the move-to-settlement events and added debug output for the travel transition
-- updated behavior/resource manifest versions and the watermark to `v0.0.111`
+- manifest versions and the watermark to `v0.0.111`
 - quirk/behavior identified about `follow_mob` in a test world: persistent pillagers do not follow a settled/governor pillager while that target is attached to a lead, whether the lead is held by a player or tied to a fence; following resumes after the lead is removed
 
 
