@@ -843,6 +843,8 @@
         "queue_command": {
           "command": [
             "say §eChecking for nearby settlements.",
+            // Joining is a local arrival action; long-range discovery remains below.
+            "execute as @s at @s if entity @e[family=settled_pillager,r=12,rm=1] run event entity @s request_join_nearby_settlement",
             // if settled pillagers nearby, move to them
             "execute as @s at @s if entity @e[family=settled_pillager,r=598,rm=1] run event entity @s found_nearby_settlement",
             // if not settled pillagers nearby, move away from players and villagers
@@ -857,7 +859,13 @@
           {
             // The active follow_mob behavior is the observable marker for this component group.
             // Do not re-add the group every time its 15-second refresh timer checks the range.
-            "filters": {"test": "has_component", "subject": "self", "operator": "!=", "value": "minecraft:behavior.follow_mob"},
+            "filters": {
+              "all_of": [
+                {"test": "has_component", "subject": "self", "operator": "!=", "value": "minecraft:behavior.follow_mob"},
+                // idk if this test below is necessary. Friday added it.
+                {"test": "is_family", "subject": "self", "operator": "!=", "value": "settled_pillager"}
+              ]
+            },
             "trigger": "move_to_settled_pillagers"
           }
         ]
@@ -872,6 +880,22 @@
       "move_to_settled_pillagers": {
         "remove": {"component_groups": ["avoid_players_and_villagers"]},
         "add": {"component_groups": ["move_to_settled_pillagers"]}
+      },
+
+      "request_join_nearby_settlement": {
+        "sequence": [
+          {
+            // A dynamic property is assigned by Script API before this entity gains settled status.
+            "filters": {"test": "has_component", "subject": "self", "value": "minecraft:behavior.follow_mob"},
+            "queue_command": {"command": "scriptevent op:join_nearby_settlement"}
+          }
+        ]
+      },
+
+      "joined_nearby_settlement": {
+        "remove": {"component_groups": ["move_to_settled_pillagers"]},
+        "add": {"component_groups": ["belongs_to_settlement"]},
+        "queue_command": {"command": "say §aJoined a settlement."}
       },
 
       "remove_move_to_settled_pillagers": {
