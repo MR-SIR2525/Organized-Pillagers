@@ -283,6 +283,14 @@
               {"test": "is_family", "subject": "other", "value": "governor_pillager"}
             ]
           }
+        },
+        "minecraft:timer": {
+          "time": 15,
+          "looping": true,
+          "time_down_event": {
+            "event": "check_for_nearby_settlements",
+            "target": "self"
+          }
         }
       },
 
