@@ -27,12 +27,14 @@ test("registerSettlement stores the first record under its own property and link
     const settlement = registerSettlement(world, founder, {
         dimensionId: "minecraft:overworld",
         center: { x: 123, y: 70, z: -456 },
+        orientation: "west",
     });
 
     assert.deepEqual(settlement, {
         id: 1,
         dimensionId: "minecraft:overworld",
         center: { x: 123, y: 70, z: -456 },
+        orientation: "west",
     });
     assert.equal(founder.getDynamicProperty("op:settlementId"), 1);
     assert.equal(world.getDynamicProperty("op:settlementNextId"), 2);
@@ -55,6 +57,7 @@ test("registerSettlement returns the founder's existing settlement without creat
     const settlement = registerSettlement(world, founder, {
         dimensionId: "minecraft:the_nether",
         center: { x: 999, y: 70, z: 999 },
+        orientation: "north",
     });
 
     assert.deepEqual(settlement, existingSettlement);
@@ -70,6 +73,7 @@ test("registerSettlement allocates after the persisted next ID", () => {
     const settlement = registerSettlement(world, founder, {
         dimensionId: "minecraft:the_end",
         center: { x: -1, y: 80, z: 2 },
+        orientation: "east",
     });
 
     assert.equal(settlement.id, 8);
@@ -113,6 +117,7 @@ test("registerSettlement refuses to overwrite an existing record at the next ID"
     assert.throws(() => registerSettlement(world, founder, {
         dimensionId: "minecraft:overworld",
         center: { x: 1, y: 70, z: 1 },
+        orientation: "north",
     }), /already exists/);
     assert.equal(founder.getDynamicProperty("op:settlementId"), undefined);
 });
