@@ -1,3 +1,10 @@
+### 2026-08-18 — `v0.0.112`
+- filtered Script API `scriptEventReceive` handling to the `op` namespace so Organized Pillagers ignores Script API events from other addons
+- consolidated testing Script API commands under `op:test`, with the first message token selecting the test action and remaining tokens preserved as that action’s payload
+- migrated the random-stroll test event to the new `op:test randomStrollToNewSpot` syntax
+- added `test-commands.md`, documenting the test Script API actions, persistent-pillager test/state events, safe invocation patterns, and known lead/follow limitation
+
+
 ### 2026-08-16
 - added persistent-pillager arrival and nearby-settlement joining: a traveller validates a nearby sponsor, receives that sponsor’s `op:settlementId`, stops following, and gains the settled-pillager family
 - added validated settlement lookup and membership-assignment helpers with test coverage that rejects missing records and silent reassignment to another settlement
