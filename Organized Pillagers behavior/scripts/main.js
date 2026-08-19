@@ -2,8 +2,7 @@ import { world, system } from "@minecraft/server";
 
 import { assignSettlementMembership, registerSettlement } from "./settlementRegistry.js";
 
-
-// /scriptevent wiki:test Hello World
+// Syntax:  /scriptevent <namespace:id> [message]
 system.afterEvents.scriptEventReceive.subscribe((event) => {
     const {
         id,           // returns string (wiki:test)
@@ -90,6 +89,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 {
     namespaces: ["op"]
 });
+
 
 const settlementSearches = new Set();
 const SETTLEMENT_ARRIVAL_RADIUS = 12;

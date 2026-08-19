@@ -1010,7 +1010,7 @@
       //for script testing
       "run_randomStrollToNewSpot": {
         "queue_command": {
-          "command": "scriptevent op:randomStrollToNewSpot ..."
+          "command": "scriptevent op:test randomStrollToNewSpot ..."
         }
       },
 
