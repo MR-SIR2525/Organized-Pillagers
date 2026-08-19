@@ -14,7 +14,6 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
         sourceType,   // returns MessageSourceType
     } = event;
 
-    //what if I use the same id for all p_pillager commands and just change the message?
     if (id === "op:find_spot_for_settlement" && sourceType === "Entity") {
         find_spot_for_settlement(sourceEntity);
     }
@@ -24,59 +23,72 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     else if (id === "op:manually_register_settlement" && sourceType === "Entity") {
         manuallyRegisterSettlement(sourceEntity);
     }
-    else if (id === "op:getFacing") {
-        getFacing(sourceEntity);
-    }
-    else if (id === "op:getYRot") {
-        print("§b" + sourceEntity.name + " facing " + sourceEntity.getRotation().y.toFixed(2));
-    }
-    else if (id === "op:getBlock") {
-        getBlock(message, sourceEntity);
-    }
-    else if (id === "op:isFlatEnough") {
-        if (message && sourceEntity) {
-            // Parse X, Y, Z coordinates
-            let coords = message.split(" ");
+    else if (id === "op:test") {
+        // Test commands use their action as the first message token; remaining tokens stay as payload.
+        const [action, ...args] = message.split(" ");
+        const payload = args.join(" ");
 
-            let x = (coords[0] === "~") ? Math.round(sourceEntity.location.x) : Number.parseFloat(coords[0]);
-            let y = (coords[1] === "~") ? Math.round(sourceEntity.location.y) : Number.parseFloat(coords[1]);
-            let z = (coords[2] === "~") ? Math.round(sourceEntity.location.z) : Number.parseFloat(coords[2]);
+        switch (action) {
+            case "getFacing":
+                getFacing(sourceEntity);
+                break;
+            case "getYRot":
+                print("§b" + sourceEntity.name + " facing " + sourceEntity.getRotation().y.toFixed(2));
+                break;
+            case "getBlock":
+                getBlock(payload, sourceEntity);
+                break;
+            case "isFlatEnough":
+                if (payload && sourceEntity) {
+                    // Parse X, Y, Z coordinates
+                    let coords = payload.split(" ");
 
-            let radius = Number.parseFloat(coords[3]);
-            let threshold = Number.parseFloat(coords[4]);
-            let successPercentage = Number.parseFloat(coords[5]);
+                    let x = (coords[0] === "~") ? Math.round(sourceEntity.location.x) : Number.parseFloat(coords[0]);
+                    let y = (coords[1] === "~") ? Math.round(sourceEntity.location.y) : Number.parseFloat(coords[1]);
+                    let z = (coords[2] === "~") ? Math.round(sourceEntity.location.z) : Number.parseFloat(coords[2]);
 
-            if (isFlatEnough(sourceEntity.dimension, x, y, z, radius, threshold, successPercentage)) {
-                print("§aThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is flat enough.");
-            }
-            else {
-                print("§cThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is not flat enough.");
-            }
+                    let radius = Number.parseFloat(coords[3]);
+                    let threshold = Number.parseFloat(coords[4]);
+                    let successPercentage = Number.parseFloat(coords[5]);
+
+                    if (isFlatEnough(sourceEntity.dimension, x, y, z, radius, threshold, successPercentage)) {
+                        print("§aThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is flat enough.");
+                    }
+                    else {
+                        print("§cThe area " + radius + " blocks around point " + x + " " + y + " " + z + " is not flat enough.");
+                    }
+                }
+                break;
+            case "visualize":
+                if (sourceEntity) {
+                    let x = sourceEntity.location.x;
+                    let y = sourceEntity.location.y;
+                    let z = sourceEntity.location.z;
+
+                    const radius = 48;
+                    const height = 10;
+                    const depth = 6;
+
+                    visualize(sourceEntity.dimension, x, y, z, radius, height, depth);
+                }
+                else print("§cSourceEntity required.");
+                break;
+            case "randomStrollToNewSpot":
+                if (sourceEntity) {
+                    randomStrollToNewSpot(sourceEntity);
+                }
+                else print("§cSourceEntity required.");
+                break;
+            default:
+                print(`§cUnrecognized Organized Pillagers test action: §e"${action}"§f with payload: §e"${payload}"`);
         }
-    }
-    else if (id === "op:visualize") {
-        if (sourceEntity) {
-            let x = sourceEntity.location.x;
-            let y = sourceEntity.location.y;
-            let z = sourceEntity.location.z;
-
-            const radius = 48;
-            const height = 10;
-            const depth = 6;
-
-            visualize(sourceEntity.dimension, x, y, z, radius, height, depth);
-        }
-        else print("§cSourceEntity required.");
-    }
-    else if (id === "op:randomStrollToNewSpot") {
-        if (sourceEntity) {
-            randomStrollToNewSpot(sourceEntity);
-        }
-        else print("§cSourceEntity required.");
     }
     else {
-        print("§cUnrecognized event: §e\"" + id + "\"§f with message: §e\"" + message + "\"");
+        print(`§cUnrecognized Organized Pillagers event: §e"${id}"§f with message: §e"${message}"`);
     }
+},
+{
+    namespaces: ["op"]
 });
 
 const settlementSearches = new Set();
