@@ -1,3 +1,8 @@
+### 2026-08-19 — `v0.0.122`
+- added a force-aware physical initial-build executor: default placement soft-overwrites terrain/liquids but preflights portal, obsidian, and inventory/container blocks; explicit `true` permits forced rebuilds
+- added player/server and settlement-member build commands plus a player-facing four-orientation grid test with floating stone/sign labels
+- added pure build-plan and orientation-grid tests for the first cobblestone-square / dirt-house stage
+
 ### 2026-08-19 — `v0.0.121`
 - made `op:test deleteSettlement <id>` source-independent, allowing direct player/server invocation with `/scriptevent op:test deleteSettlement <id>`
 - changed deleted-settlement cleanup to enumerate and release every currently loaded matching persistent pillager after its registry record is removed
