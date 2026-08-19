@@ -89,7 +89,7 @@ system.afterEvents.scriptEventReceive.subscribe(async (event) => {
                 else print("§cSourceEntity required.");
                 break;
             case "deleteSettlement":
-                deleteSettlementForTest(payload, sourceEntity);
+                deleteSettlementForTest(payload);
                 break;
             case "deactivateSettlement":
                 deactivateSettlementForTest(payload);
@@ -790,10 +790,10 @@ function releaseLoadedDeletedSettlementMembers(members) {
 
 /**
  * Deletes one registry record through the testing command namespace.
- * The entity source is optional, but when it is the matching loaded founder its settlement link is
- * cleared by deleteSettlement along with the world record.
+ * This action intentionally has no entity-source dependency: it releases every loaded matching
+ * member itself after deleting the world record.
  */
-function deleteSettlementForTest(payload, sourceEntity) {
+function deleteSettlementForTest(payload) {
     const settlementId = Number(payload);
     if (!Number.isInteger(settlementId) || settlementId < 1) {
         print("§cUsage: op:test deleteSettlement <positive settlement ID>.");
@@ -803,7 +803,7 @@ function deleteSettlementForTest(payload, sourceEntity) {
     try {
         // Capture loaded members before deletion, then release all of them after the record is gone.
         const members = getLoadedSettlementMembers(settlementId);
-        const deletedSettlement = deleteSettlement(world, settlementId, sourceEntity);
+        const deletedSettlement = deleteSettlement(world, settlementId);
         if (deletedSettlement === undefined) {
             print("§eSettlement #" + settlementId + " does not exist.");
             return false;

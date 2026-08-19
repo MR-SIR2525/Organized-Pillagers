@@ -83,11 +83,6 @@ export function assignSettlementMembership(world, member, settlementId) {
     if (settlement === undefined) {
         throw new Error(`Settlement ${settlementId} does not exist.`);
     }
-    // Legacy records without the field remain active; only an explicit false deactivates a town.
-    if (settlement.active === false) {
-        throw new Error(`Settlement ${settlementId} is inactive.`);
-    }
-
     const existingSettlementId = member.getDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY);
     if (existingSettlementId !== undefined) {
         validateSettlementId(existingSettlementId);

@@ -124,7 +124,7 @@ test("registerSettlement refuses to overwrite an existing record at the next ID"
     assert.equal(founder.getDynamicProperty("op:settlementId"), undefined);
 });
 
-test("deactivateSettlement preserves the record and prevents new membership", () => {
+test("deactivateSettlement preserves the record and allows membership to continue", () => {
     const settlement = {
         id: 3,
         dimensionId: "minecraft:overworld",
@@ -135,14 +135,17 @@ test("deactivateSettlement preserves the record and prevents new membership", ()
     const world = createDynamicPropertyStore({
         "op:settlement_3": JSON.stringify(settlement),
     });
+    const survivor = createDynamicPropertyStore();
 
     const deactivated = deactivateSettlement(world, 3);
 
     assert.deepEqual(deactivated, { ...settlement, active: false });
     assert.deepEqual(getSettlement(world, 3), { ...settlement, active: false });
+    assert.deepEqual(assignSettlementMembership(world, survivor, 3), { ...settlement, active: false });
+    assert.equal(survivor.getDynamicProperty("op:settlementId"), 3);
     assert.throws(
-        () => assignSettlementMembership(world, createDynamicPropertyStore(), 3),
-        /inactive/
+        () => assignSettlementMembership(world, createDynamicPropertyStore(), 4),
+        /does not exist/
     );
 });
 
