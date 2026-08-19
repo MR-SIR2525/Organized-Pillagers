@@ -1,6 +1,14 @@
 import { world, system } from "@minecraft/server";
 
-import { assignSettlementMembership, registerSettlement } from "./settlementRegistry.js";
+import {
+    assignSettlementMembership,
+    deactivateSettlement,
+    deleteSettlement,
+    getSettlement,
+    registerSettlement,
+} from "./settlementRegistry.js";
+import { createSettlementLayout } from "./settlementLayout.js";
+
 
 // Syntax:  /scriptevent <namespace:id> [message]
 system.afterEvents.scriptEventReceive.subscribe(async (event) => {
@@ -79,6 +87,15 @@ system.afterEvents.scriptEventReceive.subscribe(async (event) => {
                     randomStrollToNewSpot(sourceEntity);
                 }
                 else print("§cSourceEntity required.");
+                break;
+            case "deleteSettlement":
+                deleteSettlementForTest(payload, sourceEntity);
+                break;
+            case "deactivateSettlement":
+                deactivateSettlementForTest(payload);
+                break;
+            case "previewSettlementLayout":
+                previewSettlementLayout(sourceEntity);
                 break;
             default:
                 print(`§cUnrecognized Organized Pillagers test action: §e"${action}"§f with payload: §e"${payload}"`);
@@ -682,4 +699,167 @@ function visualize(dimension, x, y, z, radius, height, depth)
     }
 
     print("Visualize function complete.");
+}
+
+
+/**
+ * Marks a settlement inactive through the testing command namespace, then returns every loaded
+ * persistent member to its settlement center for temporary test-world handling.
+ */
+function deactivateSettlementForTest(payload) {
+    const settlementId = Number(payload);
+    if (!Number.isInteger(settlementId) || settlementId < 1) {
+        print("§cUsage: op:test deactivateSettlement <positive settlement ID>.");
+        return false;
+    }
+
+    try {
+        const settlement = deactivateSettlement(world, settlementId);
+        if (settlement === undefined) {
+            print("§eSettlement #" + settlementId + " does not exist.");
+            return false;
+        }
+
+        const movedCount = moveLoadedMembersToInactiveSettlement(settlement);
+        print("§aDeactivated settlement #" + settlementId + " and moved " + movedCount
+            + " loaded persistent pillager(s) to its center.");
+        return true;
+    }
+    catch (error) {
+        print("§cCould not deactivate settlement #" + settlementId + ": " + error);
+        return false;
+    }
+}
+
+function getLoadedSettlementMembers(settlementId) {
+    const dimensionIds = ["overworld", "nether", "the_end"];
+    const members = [];
+
+    for (const dimensionId of dimensionIds) {
+        const dimension = world.getDimension(dimensionId);
+        for (const member of dimension.getEntities({ type: "op:persistent_pillager" })) {
+            if (!member.isValid) continue;
+            if (member.getDynamicProperty("op:settlementId") === settlementId) {
+                members.push(member);
+            }
+        }
+    }
+
+    return members;
+}
+
+/**
+ * Temporary inactive-settlement policy: keep membership intact, teleport loaded members to the
+ * stored center plus the requested X+5/Y+1 offset, then leave them otherwise unchanged.
+ */
+function moveLoadedMembersToInactiveSettlement(settlement) {
+    const targetDimension = world.getDimension(settlement.dimensionId.replace("minecraft:", ""));
+    const targetLocation = {
+        x: settlement.center.x + 5,
+        y: settlement.center.y + 1,
+        z: settlement.center.z,
+    };
+    let movedCount = 0;
+
+    for (const member of getLoadedSettlementMembers(settlement.id)) {
+        try {
+            member.teleport(targetLocation, { dimension: targetDimension });
+            movedCount += 1;
+        }
+        catch (error) {
+            print("§eCould not move a member of inactive settlement #" + settlement.id + ": " + error);
+        }
+    }
+
+    return movedCount;
+}
+
+/**
+ * Releases loaded members of a deleted settlement only after the registry record is gone.
+ */
+function releaseLoadedDeletedSettlementMembers(members) {
+    for (const member of members) {
+        member.setDynamicProperty("op:settlementId", undefined);
+    }
+    for (const member of members) {
+        member.triggerEvent("release_from_deleted_settlement");
+    }
+
+    return members.length;
+}
+
+/**
+ * Deletes one registry record through the testing command namespace.
+ * The entity source is optional, but when it is the matching loaded founder its settlement link is
+ * cleared by deleteSettlement along with the world record.
+ */
+function deleteSettlementForTest(payload, sourceEntity) {
+    const settlementId = Number(payload);
+    if (!Number.isInteger(settlementId) || settlementId < 1) {
+        print("§cUsage: op:test deleteSettlement <positive settlement ID>.");
+        return false;
+    }
+
+    try {
+        // Capture loaded members before deletion, then release all of them after the record is gone.
+        const members = getLoadedSettlementMembers(settlementId);
+        const deletedSettlement = deleteSettlement(world, settlementId, sourceEntity);
+        if (deletedSettlement === undefined) {
+            print("§eSettlement #" + settlementId + " does not exist.");
+            return false;
+        }
+
+        const releasedCount = releaseLoadedDeletedSettlementMembers(members);
+        print("§aDeleted settlement #" + settlementId + " and released " + releasedCount
+            + " loaded persistent pillager(s) to search again.");
+        return true;
+    }
+    catch (error) {
+        print("§cCould not delete settlement #" + settlementId + ": " + error);
+        return false;
+    }
+}
+
+/**
+ * Resolves and reports the deterministic initial layout for an existing governor's settlement.
+ * This is deliberately a no-world-write preview: it lets a test governor verify its center,
+ * orientation, town square, and reserved palace lot before a build executor is introduced.
+ */
+function previewSettlementLayout(sourceEntity) {
+    if (!isUsableEntity(sourceEntity)) return false;
+
+    const settlementId = sourceEntity.getDynamicProperty("op:settlementId");
+    if (!Number.isInteger(settlementId)) {
+        print("§cSource entity has no valid op:settlementId.");
+        return false;
+    }
+
+    try {
+        const settlement = getSettlement(world, settlementId);
+        if (settlement === undefined) {
+            print("§cSettlement #" + settlementId + " does not exist.");
+            return false;
+        }
+
+        // Older records predate orientation persistence, so use the governor's current facing only
+        // for this preview. Newly registered settlements use their persisted orientation instead.
+        const orientation = settlement.orientation ?? get_cardinal_direction(sourceEntity.getRotation().y);
+        const layout = createSettlementLayout(settlement, orientation);
+        const { center } = layout;
+        const { localBounds: squareBounds } = layout.townSquare;
+        const { localBounds: lotBounds, frontageCenter } = layout.governorLot;
+
+        print("§aSettlement #" + settlementId + " layout preview (" + layout.orientation + "):"
+            + " square " + (squareBounds.maxU - squareBounds.minU + 1) + "x"
+            + (squareBounds.maxV - squareBounds.minV + 1) + " centered at "
+            + center.x + " " + center.y + " " + center.z + ".");
+        print("§aGovernor lot " + (lotBounds.maxU - lotBounds.minU + 1) + "x"
+            + (lotBounds.maxV - lotBounds.minV + 1) + " begins at "
+            + frontageCenter.x + " " + frontageCenter.y + " " + frontageCenter.z + ".");
+        return true;
+    }
+    catch (error) {
+        print("§cCould not preview settlement layout: " + error);
+        return false;
+    }
 }

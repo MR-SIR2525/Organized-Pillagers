@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
     assignSettlementMembership,
+    deactivateSettlement,
     deleteSettlement,
     getSettlement,
     registerSettlement,
@@ -35,6 +36,7 @@ test("registerSettlement stores the first record under its own property and link
         dimensionId: "minecraft:overworld",
         center: { x: 123, y: 70, z: -456 },
         orientation: "west",
+        active: true,
     });
     assert.equal(founder.getDynamicProperty("op:settlementId"), 1);
     assert.equal(world.getDynamicProperty("op:settlementNextId"), 2);
@@ -120,6 +122,28 @@ test("registerSettlement refuses to overwrite an existing record at the next ID"
         orientation: "north",
     }), /already exists/);
     assert.equal(founder.getDynamicProperty("op:settlementId"), undefined);
+});
+
+test("deactivateSettlement preserves the record and prevents new membership", () => {
+    const settlement = {
+        id: 3,
+        dimensionId: "minecraft:overworld",
+        center: { x: 10, y: 71, z: 20 },
+        orientation: "north",
+        active: true,
+    };
+    const world = createDynamicPropertyStore({
+        "op:settlement_3": JSON.stringify(settlement),
+    });
+
+    const deactivated = deactivateSettlement(world, 3);
+
+    assert.deepEqual(deactivated, { ...settlement, active: false });
+    assert.deepEqual(getSettlement(world, 3), { ...settlement, active: false });
+    assert.throws(
+        () => assignSettlementMembership(world, createDynamicPropertyStore(), 3),
+        /inactive/
+    );
 });
 
 test("deleteSettlement removes one record without reusing its ID and clears its founder link", () => {

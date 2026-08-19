@@ -1104,6 +1104,19 @@
         "queue_command": {"command": "say §eNo longer belongs to a settlement."}  //for debug
       },
 
+      "release_from_deleted_settlement": {
+        "sequence": [
+          {
+            // Script API clears op:settlementId first, then this removes all settled family sources.
+            "remove": {"component_groups": ["governor_pillager", "belongs_to_settlement", "move_to_settled_pillagers"]}
+          },
+          {
+            // A deleted settlement has no home to preserve, so restart the established search flow.
+            "trigger": "check_for_nearby_settlements"
+          }
+        ]
+      },
+
       "peaceful": {
         "sequence": [
           {

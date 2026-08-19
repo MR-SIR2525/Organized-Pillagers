@@ -83,6 +83,10 @@ export function assignSettlementMembership(world, member, settlementId) {
     if (settlement === undefined) {
         throw new Error(`Settlement ${settlementId} does not exist.`);
     }
+    // Legacy records without the field remain active; only an explicit false deactivates a town.
+    if (settlement.active === false) {
+        throw new Error(`Settlement ${settlementId} is inactive.`);
+    }
 
     const existingSettlementId = member.getDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY);
     if (existingSettlementId !== undefined) {
@@ -181,6 +185,7 @@ export function registerSettlement(world, founder, { dimensionId, center, orient
         // Copy validated values so callers cannot mutate the persisted spatial identity object.
         center: { x: center.x, y: center.y, z: center.z },
         orientation,
+        active: true,
     };
 
     // Write the record before linking the founder, so the link never points to a missing record.
@@ -189,6 +194,25 @@ export function registerSettlement(world, founder, { dimensionId, center, orient
     founder.setDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY, id);
 
     return settlement;
+}
+
+/**
+ * Marks a settlement inactive while preserving its permanent record and ID.
+ *
+ * Inactive settlements cannot accept new members. The caller owns releasing any currently loaded
+ * members because the registry deliberately has no global list of entities, including unloaded
+ * members that must be handled when they next participate in settlement logic.
+ */
+export function deactivateSettlement(world, settlementId) {
+    validateSettlementId(settlementId);
+
+    const settlement = loadSettlement(world, settlementId);
+    if (settlement === undefined) return undefined;
+    if (settlement.active === false) return settlement;
+
+    const inactiveSettlement = { ...settlement, active: false };
+    world.setDynamicProperty(getSettlementPropertyId(settlementId), JSON.stringify(inactiveSettlement));
+    return inactiveSettlement;
 }
 
 /**
