@@ -126,7 +126,43 @@ The entity event below is a shorter alternate trigger for the same script action
 
 Loads the source governor's `op:settlementId`, resolves the authoritative registry record, and prints the planned town-square and governor-lot dimensions, center, frontage, and orientation.
 
-This is a **no-world-write preview**. It does not place the square or dirt house yet. For legacy settlement records that predate persisted orientation, it previews using the governor's current facing direction.
+This is a **no-world-write preview**. It does not place the square or dirt house. For legacy settlement records that predate persisted orientation, it previews using the governor's current facing direction.
+
+### `buildSettlementLayout [<settlementId>] [true|false]`
+
+As a settlement member, omit the ID to build that member's settlement:
+
+```mcfunction
+/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test buildSettlementLayout
+```
+
+As a player/server command, supply the authoritative settlement ID:
+
+```mcfunction
+/scriptevent op:test buildSettlementLayout 4
+```
+
+The first physical stage places a cobblestone 17×17 square and the compact dirt governor house from the stored orientation-aware plan. Default `false` uses a blacklist preflight: it refuses to overwrite end/nether portal blocks, obsidian, crying obsidian, or any inventory/container block. Natural terrain, water, and lava remain replaceable. Pass `true` to intentionally bypass that overwrite protection:
+
+```mcfunction
+/scriptevent op:test buildSettlementLayout 4 true
+```
+
+Force does **not** bypass settlement-record validation or change the record’s destination dimension.
+
+### `buildOrientationTestGrid [true|false]`
+
+```mcfunction
+/scriptevent op:test buildOrientationTestGrid
+```
+
+Player-only test action. It starts at the invoking player’s floored block location and lays out four builds in a facing-relative 2×2 grid, 64 blocks apart: north, east, south, and west variants. Each center gets a floating stone block ten blocks above it and an oak sign above that reading the orientation.
+
+Use `true` only to overwrite protected blocks deliberately:
+
+```mcfunction
+/scriptevent op:test buildOrientationTestGrid true
+```
 
 ### `deactivateSettlement <settlementId>`
 

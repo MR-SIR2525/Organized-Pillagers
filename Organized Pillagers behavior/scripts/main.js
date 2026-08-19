@@ -1,4 +1,4 @@
-import { world, system } from "@minecraft/server";
+import { world, system, BlockComponentTypes } from "@minecraft/server";
 
 import {
     assignSettlementMembership,
@@ -7,6 +7,7 @@ import {
     getSettlement,
     registerSettlement,
 } from "./settlementRegistry.js";
+import { createInitialSettlementBuildPlan, createOrientationTestGrid } from "./settlementBuilder.js";
 import { createSettlementLayout } from "./settlementLayout.js";
 
 
@@ -96,6 +97,12 @@ system.afterEvents.scriptEventReceive.subscribe(async (event) => {
                 break;
             case "previewSettlementLayout":
                 previewSettlementLayout(sourceEntity);
+                break;
+            case "buildSettlementLayout":
+                buildSettlementLayoutForTest(payload, sourceEntity);
+                break;
+            case "buildOrientationTestGrid":
+                buildOrientationTestGridForTest(payload, sourceEntity);
                 break;
             default:
                 print(`§cUnrecognized Organized Pillagers test action: §e"${action}"§f with payload: §e"${payload}"`);
@@ -816,6 +823,139 @@ function deleteSettlementForTest(payload) {
     }
     catch (error) {
         print("§cCould not delete settlement #" + settlementId + ": " + error);
+        return false;
+    }
+}
+
+const PROTECTED_BUILD_BLOCKS = new Set([
+    "minecraft:end_portal_frame",
+    "minecraft:end_portal",
+    "minecraft:nether_portal",
+    "minecraft:obsidian",
+    "minecraft:crying_obsidian",
+]);
+
+function parseForceFlag(value) {
+    if (value === undefined || value === "" || value === "false") return false;
+    if (value === "true") return true;
+    throw new Error("Force must be true or false.");
+}
+
+function findBuildBlocker(dimension, placements) {
+    for (const placement of placements) {
+        const existing = dimension.getBlock(placement);
+        if (existing === undefined) {
+            return { placement, reason: "target block is outside a loaded chunk" };
+        }
+        if (PROTECTED_BUILD_BLOCKS.has(existing.typeId) || existing.getComponent(BlockComponentTypes.Inventory) !== undefined) {
+            return { placement, reason: "protected block " + existing.typeId };
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Places a precomputed plan only after blacklist preflight unless the explicit force flag is true.
+ * Force bypasses overwrite protection, not record validation or the destination dimension.
+ */
+function placeBuildPlan(dimension, placements, force) {
+    if (!force) {
+        const blocker = findBuildBlocker(dimension, placements);
+        if (blocker !== undefined) {
+            throw new Error("Refused to overwrite " + blocker.reason + " at "
+                + blocker.placement.x + " " + blocker.placement.y + " " + blocker.placement.z
+                + ". Re-run with true to force placement.");
+        }
+    }
+
+    for (const placement of placements) {
+        dimension.setBlockType(placement, placement.typeId);
+    }
+}
+
+function parseSettlementBuildRequest(payload, sourceEntity) {
+    const args = payload.trim().split(/\s+/).filter(Boolean);
+    const sourceSettlementId = isUsableEntity(sourceEntity)
+        ? sourceEntity.getDynamicProperty("op:settlementId")
+        : undefined;
+    let settlementId;
+    let forceArgument;
+
+    if (Number.isInteger(sourceSettlementId) && (args.length === 0 || args[0] === "true" || args[0] === "false")) {
+        settlementId = sourceSettlementId;
+        forceArgument = args[0];
+    }
+    else {
+        settlementId = Number(args[0]);
+        forceArgument = args[1];
+    }
+    if (!Number.isInteger(settlementId) || settlementId < 1) {
+        throw new Error("Usage: buildSettlementLayout [true|false] as a member, or buildSettlementLayout <settlement ID> [true|false].");
+    }
+    return { settlementId, force: parseForceFlag(forceArgument) };
+}
+
+/**
+ * Lets either a settlement member or a player build an existing record. Player invocation supplies
+ * the ID explicitly; a member may omit it and use its own durable membership reference.
+ */
+function buildSettlementLayoutForTest(payload, sourceEntity) {
+    try {
+        const { settlementId, force } = parseSettlementBuildRequest(payload, sourceEntity);
+        const settlement = getSettlement(world, settlementId);
+        if (settlement === undefined) throw new Error("Settlement " + settlementId + " does not exist.");
+
+        const dimension = world.getDimension(settlement.dimensionId.replace("minecraft:", ""));
+        const plan = createInitialSettlementBuildPlan(settlement);
+        placeBuildPlan(dimension, plan.placements, force);
+        print("§aBuilt settlement #" + settlementId + " (" + plan.orientation + ", force=" + force + ").");
+        return true;
+    }
+    catch (error) {
+        print("§cCould not build settlement layout: " + error);
+        return false;
+    }
+}
+
+/**
+ * Player-only visual test: produces north/east/south/west variants in a facing-relative 2×2 grid.
+ */
+function buildOrientationTestGridForTest(payload, sourceEntity) {
+    if (!isUsableEntity(sourceEntity) || sourceEntity.typeId !== "minecraft:player") {
+        print("§cbuildOrientationTestGrid must be invoked directly by a player.");
+        return false;
+    }
+
+    try {
+        const force = parseForceFlag(payload.trim());
+        const origin = {
+            x: Math.floor(sourceEntity.location.x),
+            y: Math.floor(sourceEntity.location.y),
+            z: Math.floor(sourceEntity.location.z),
+        };
+        const playerFacing = get_cardinal_direction(sourceEntity.getRotation().y);
+        const variants = createOrientationTestGrid(origin, playerFacing);
+        const allPlacements = [];
+        for (const [index, variant] of variants.entries()) {
+            const plan = createInitialSettlementBuildPlan({
+                id: index + 1,
+                dimensionId: sourceEntity.dimension.id,
+                center: variant.center,
+                orientation: variant.orientation,
+            });
+            allPlacements.push(...plan.placements, variant.labelMarker.stone, variant.labelMarker.sign);
+        }
+        placeBuildPlan(sourceEntity.dimension, allPlacements, force);
+
+        for (const variant of variants) {
+            const sign = sourceEntity.dimension.getBlock(variant.labelMarker.sign);
+            sign?.getComponent(BlockComponentTypes.Sign)?.setText(variant.label + " orientation");
+        }
+        print("§aBuilt four orientation test layouts (force=" + force + ").");
+        return true;
+    }
+    catch (error) {
+        print("§cCould not build orientation test grid: " + error);
         return false;
     }
 }
