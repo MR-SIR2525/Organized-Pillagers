@@ -141,7 +141,7 @@ This temporary test policy intentionally keeps their membership and settled/gove
 ### `deleteSettlement <settlementId>`
 
 ```mcfunction
-/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test deleteSettlement 1
+/scriptevent op:test deleteSettlement 1
 ```
 
 Deletes `op:settlement_1` from the world registry without reusing its ID. Every currently loaded persistent pillager that referenced it has its `op:settlementId` cleared, loses settled/governor state, and restarts the nearby-settlement search flow.
