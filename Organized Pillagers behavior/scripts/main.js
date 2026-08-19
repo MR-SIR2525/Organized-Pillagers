@@ -3,7 +3,7 @@ import { world, system } from "@minecraft/server";
 import { assignSettlementMembership, registerSettlement } from "./settlementRegistry.js";
 
 // Syntax:  /scriptevent <namespace:id> [message]
-system.afterEvents.scriptEventReceive.subscribe((event) => {
+system.afterEvents.scriptEventReceive.subscribe(async (event) => {
     const {
         id,           // returns string (wiki:test)
         initiator,    // returns the entity that initiated the NPC dialogue.
@@ -14,7 +14,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     } = event;
 
     if (id === "op:find_spot_for_settlement" && sourceType === "Entity") {
-        find_spot_for_settlement(sourceEntity);
+        if (await find_spot_for_settlement(sourceEntity)) {
+            // Settlement registration succeeded. The later construction executor hooks in here.
+        }
     }
     else if (id === "op:join_nearby_settlement" && sourceType === "Entity") {
         joinNearbySettlement(sourceEntity);
@@ -209,9 +211,12 @@ async function find_spot_for_settlement(sourceEntity) {
             y: Math.round(sourceEntity.location.y),
             z: Math.round(sourceEntity.location.z),
         };
+        // The governor's facing becomes the settlement's permanent local-north direction.
+        const orientation = get_cardinal_direction(sourceEntity.getRotation().y);
         const settlement = registerSettlement(world, sourceEntity, {
             dimensionId: sourceEntity.dimension.id,
             center,
+            orientation,
         });
 
         // Keep the existing entity properties during the transition to the registry.
@@ -240,9 +245,12 @@ function manuallyRegisterSettlement(sourceEntity) {
             y: Math.round(sourceEntity.location.y),
             z: Math.round(sourceEntity.location.z),
         };
+        // Manual registration follows the same orientation rule as normal settlement founding.
+        const orientation = get_cardinal_direction(sourceEntity.getRotation().y);
         const settlement = registerSettlement(world, sourceEntity, {
             dimensionId: sourceEntity.dimension.id,
             center,
+            orientation,
         });
 
         // Keep the existing entity properties during the transition to the registry.

@@ -125,7 +125,7 @@ function getNextSettlementId(world) {
  * The site-selection flow owns the rounding decision. The registry only accepts the resulting
  * integer block coordinate, avoiding a hidden normalization rule at the persistence boundary.
  */
-function validateSettlementDetails(dimensionId, center) {
+function validateSettlementDetails(dimensionId, center, orientation) {
     if (typeof dimensionId !== "string" || dimensionId.trim().length === 0) {
         throw new Error("Settlement dimension ID must be a non-empty string.");
     }
@@ -139,6 +139,10 @@ function validateSettlementDetails(dimensionId, center) {
     ) {
         throw new Error("Settlement center must use integer block coordinates.");
     }
+
+    if (!["north", "east", "south", "west"].includes(orientation)) {
+        throw new Error("Settlement orientation must be north, east, south, or west.");
+    }
 }
 
 /**
@@ -146,13 +150,13 @@ function validateSettlementDetails(dimensionId, center) {
  *
  * @param {World} world The Bedrock world that owns durable settlement metadata.
  * @param {Entity} founder The persistent pillager that found the suitable location.
- * @param {{ dimensionId: string, center: { x: number, y: number, z: number } }} details
- * The dimension and integer block coordinates selected by the existing suitability search.
+ * @param {{ dimensionId: string, center: { x: number, y: number, z: number }, orientation: "north" | "east" | "south" | "west" }} details
+ * The dimension, integer block coordinates, and governor-facing cardinal direction selected at registration.
  * @returns {{ id: number, dimensionId: string, center: { x: number, y: number, z: number } }}
  * The existing or newly created settlement record.
  */
-export function registerSettlement(world, founder, { dimensionId, center }) {
-    validateSettlementDetails(dimensionId, center);
+export function registerSettlement(world, founder, { dimensionId, center, orientation }) {
+    validateSettlementDetails(dimensionId, center, orientation);
 
     const existingSettlementId = founder.getDynamicProperty(FOUNDER_SETTLEMENT_ID_PROPERTY);
     if (Number.isInteger(existingSettlementId)) {
@@ -174,8 +178,9 @@ export function registerSettlement(world, founder, { dimensionId, center }) {
     const settlement = {
         id,
         dimensionId,
-        // Copy the validated integer values so callers cannot mutate the persisted origin object.
+        // Copy validated values so callers cannot mutate the persisted spatial identity object.
         center: { x: center.x, y: center.y, z: center.z },
+        orientation,
     };
 
     // Write the record before linking the founder, so the link never points to a missing record.
