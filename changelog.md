@@ -1,4 +1,14 @@
-### 2026-08-18 — `v0.0.112`
+### 2026-08-19 — `v0.0.120`
+- added deterministic, orientation-aware settlement layout planning: a 17×17 town square centered on the registered settlement center, plus a permanently reserved 27×31 Governor’s Row / future palace lot on local north
+- defined the provisional level-0 governor dirt-house footprint within that reserved lot, allowing later upgrades to expand without moving the street frontage
+- persisted a newly founded governor’s cardinal facing direction as settlement orientation and added layout/registry test coverage for it
+- added the `instant_despawn` component group and entity event
+- added settlement activity state: new settlements begin `active: true`, inactive records reject new membership, and deactivation preserves the settlement record and ID instead of deleting it
+- added `op:test deactivateSettlement <id>`: currently loaded members keep their settlement membership but are teleported to the inactive settlement center with offset `x+5`, `y+1`, `z+0` for temporary testing
+- extended `op:test deleteSettlement <id>`: currently loaded members of a deleted settlement clear their reference, lose settlement status, and restart the existing nearby-settlement search flow
+- added preview/delete/deactivate test-command documentation and Node coverage for deactivation; unloaded-member cleanup remains deferred
+
+### 2026-08-19 — `v0.0.112`
 - filtered Script API `scriptEventReceive` handling to the `op` namespace so Organized Pillagers ignores Script API events from other addons
 - consolidated testing Script API commands under `op:test`, with the first message token selecting the test action and remaining tokens preserved as that action’s payload
 - migrated the random-stroll test event to the new `op:test randomStrollToNewSpot` syntax
