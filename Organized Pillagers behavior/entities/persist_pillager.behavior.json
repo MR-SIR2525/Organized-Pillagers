@@ -60,6 +60,10 @@
     },
 
     "component_groups": {
+      "instant_despawn": {
+        "minecraft:instant_despawn": {}
+      },
+
       "minecraft:celebrate": {
         "minecraft:behavior.celebrate": {
           "priority": 5,
@@ -220,9 +224,7 @@
       },
 
 
-
-      // testing alternative to the nearest attackable target behavior
-      "move_to_settled_pillagers": {      // "follow_settled_pillager": {
+      "move_to_settled_pillagers": {
         "minecraft:behavior.follow_mob": {
           "priority": 2,
           "search_range": 598,
@@ -759,6 +761,10 @@
 
 
     "events": {
+      "instant_despawn": {
+        "add": {"component_groups": ["instant_despawn"]}
+      },
+
       "minecraft:entity_spawned": {
         "sequence": [
           {
