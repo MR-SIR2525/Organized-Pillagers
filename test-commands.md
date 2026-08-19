@@ -118,6 +118,36 @@ Starts the script-driven random-stroll routine used while a potential founder se
 
 The entity event below is a shorter alternate trigger for the same script action.
 
+### `previewSettlementLayout`
+
+```mcfunction
+/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test previewSettlementLayout
+```
+
+Loads the source governor's `op:settlementId`, resolves the authoritative registry record, and prints the planned town-square and governor-lot dimensions, center, frontage, and orientation.
+
+This is a **no-world-write preview**. It does not place the square or dirt house yet. For legacy settlement records that predate persisted orientation, it previews using the governor's current facing direction.
+
+### `deactivateSettlement <settlementId>`
+
+```mcfunction
+/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test deactivateSettlement 1
+```
+
+Marks `op:settlement_1` inactive while retaining its world record, ID, center, orientation, and planned layout. It finds **currently loaded** persistent pillagers in the overworld, nether, and end that reference that ID and teleports them to the settlement center offset by `x+5`, `y+1`, `z+0`.
+
+This temporary test policy intentionally keeps their membership and settled/governor state intact after teleporting them. It does not delete registry data or placed blocks.
+
+### `deleteSettlement <settlementId>`
+
+```mcfunction
+/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test deleteSettlement 1
+```
+
+Deletes `op:settlement_1` from the world registry without reusing its ID. Every currently loaded persistent pillager that referenced it has its `op:settlementId` cleared, loses settled/governor state, and restarts the nearby-settlement search flow.
+
+**Destructive test tool:** this does not remove placed blocks or release members that are currently unloaded; unloaded-member validation remains future work.
+
 ---
 
 ## Persistent-pillager entity events
