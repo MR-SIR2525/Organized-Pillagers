@@ -849,12 +849,13 @@
         "queue_command": {
           "command": [
             "say §eChecking for nearby settlements.",
-            // Joining is a local arrival action; long-range discovery remains below.
-            "execute as @s at @s if entity @e[family=settled_pillager,r=12,rm=1] run event entity @s request_join_nearby_settlement",
+            // Joining is a local arrival action; do not require one block of separation because
+            // a traveller and sponsor can occupy the same boat position.
+            "execute as @s at @s if entity @e[family=settled_pillager,r=12] run event entity @s request_join_nearby_settlement",
             // if settled pillagers nearby, move to them
-            "execute as @s at @s if entity @e[family=settled_pillager,r=598,rm=1] run event entity @s found_nearby_settlement",
+            "execute as @s at @s if entity @e[family=settled_pillager,r=598] run event entity @s found_nearby_settlement",
             // if not settled pillagers nearby, move away from players and villagers
-            "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] run event entity @s failed_to_find_settlement"
+            "execute as @s at @s unless entity @e[family=settled_pillager,r=598] run event entity @s failed_to_find_settlement"
           ]
         }
       },
