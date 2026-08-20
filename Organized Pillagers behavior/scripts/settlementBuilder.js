@@ -7,6 +7,13 @@ const CARDINAL_VECTORS = {
     west: { forward: { x: -1, z: 0 }, right: { x: 0, z: -1 } },
 };
 
+const GROUND_SIGN_DIRECTIONS = {
+    south: 0,
+    west: 4,
+    north: 8,
+    east: 12,
+};
+
 function getVectors(orientation) {
     const vectors = CARDINAL_VECTORS[orientation];
     if (vectors === undefined) throw new Error(`Unknown orientation: ${orientation}.`);
@@ -62,11 +69,14 @@ export function createInitialSettlementBuildPlan(settlement, orientation = settl
     );
     // Only place the lower half; Bedrock creates/replaces the upper half. Cardinal direction must
     // match the local-north frontage so the door opens from the intended side of each variant.
-    placements[index] = block(
+    const doorPlacement = block(
         { ...door, y: door.y + 1 },
         "minecraft:wooden_door",
         { "minecraft:cardinal_direction": orientation }
     );
+    doorPlacement.clearUpperBeforePlacement = true;
+    doorPlacement.placementDelayTicks = 10;
+    placements[index] = doorPlacement;
 
     return {
         settlementId: settlement.id,
@@ -104,7 +114,11 @@ export function createOrientationTestGrid(origin, playerFacing, spacing = 64) {
             label,
             labelMarker: {
                 stone: block({ ...center, y: center.y + 10 }, "minecraft:stone"),
-                sign: block({ ...center, y: center.y + 11 }, "minecraft:sign"),
+                sign: block(
+                    { ...center, y: center.y + 11 },
+                    "minecraft:standing_sign",
+                    { "ground_sign_direction": GROUND_SIGN_DIRECTIONS[orientation] }
+                ),
             },
         };
     });

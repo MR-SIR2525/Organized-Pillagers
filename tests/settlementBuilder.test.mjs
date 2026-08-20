@@ -41,6 +41,8 @@ test("createInitialSettlementBuildPlan faces the lower door toward the house fro
             ...location,
             typeId: "minecraft:wooden_door",
             states: { "minecraft:cardinal_direction": orientation },
+            clearUpperBeforePlacement: true,
+            placementDelayTicks: 10,
         });
         assert.equal(plan.placements.filter((block) => block.typeId === "minecraft:wooden_door").length, 1);
     }
@@ -56,6 +58,12 @@ test("createOrientationTestGrid makes four labeled build plans in a facing-relat
     ]);
     assert.deepEqual(grid[0].labelMarker, {
         stone: { x: 0, y: 74, z: 0, typeId: "minecraft:stone" },
-        sign: { x: 0, y: 75, z: 0, typeId: "minecraft:sign" },
+        sign: {
+            x: 0,
+            y: 75,
+            z: 0,
+            typeId: "minecraft:standing_sign",
+            states: { "ground_sign_direction": 8 },
+        },
     });
 });

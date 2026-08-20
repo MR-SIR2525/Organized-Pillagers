@@ -99,10 +99,10 @@ system.afterEvents.scriptEventReceive.subscribe(async (event) => {
                 previewSettlementLayout(sourceEntity);
                 break;
             case "buildSettlementLayout":
-                buildSettlementLayoutForTest(payload, sourceEntity);
+                await buildSettlementLayoutForTest(payload, sourceEntity);
                 break;
             case "buildOrientationTestGrid":
-                buildOrientationTestGridForTest(payload, sourceEntity);
+                await buildOrientationTestGridForTest(payload, sourceEntity);
                 break;
             default:
                 print(`§cUnrecognized Organized Pillagers test action: §e"${action}"§f with payload: §e"${payload}"`);
@@ -858,7 +858,7 @@ function findBuildBlocker(dimension, placements) {
  * Places a precomputed plan only after blacklist preflight unless the explicit force flag is true.
  * Force bypasses overwrite protection, not record validation or the destination dimension.
  */
-function placeBuildPlan(dimension, placements, force) {
+async function placeBuildPlan(dimension, placements, force) {
     if (!force) {
         const blocker = findBuildBlocker(dimension, placements);
         if (blocker !== undefined) {
@@ -869,6 +869,13 @@ function placeBuildPlan(dimension, placements, force) {
     }
 
     for (const placement of placements) {
+        if (placement.clearUpperBeforePlacement === true) {
+            dimension.setBlockType(
+                { x: placement.x, y: placement.y + 1, z: placement.z },
+                "minecraft:air"
+            );
+            await system.waitTicks(placement.placementDelayTicks);
+        }
         if (placement.states === undefined) {
             dimension.setBlockType(placement, placement.typeId);
         }
@@ -909,7 +916,7 @@ function parseSettlementBuildRequest(payload, sourceEntity) {
  * Lets either a settlement member or a player build an existing record. Player invocation supplies
  * the ID explicitly; a member may omit it and use its own durable membership reference.
  */
-function buildSettlementLayoutForTest(payload, sourceEntity) {
+async function buildSettlementLayoutForTest(payload, sourceEntity) {
     try {
         const { settlementId, force } = parseSettlementBuildRequest(payload, sourceEntity);
         const settlement = getSettlement(world, settlementId);
@@ -917,7 +924,7 @@ function buildSettlementLayoutForTest(payload, sourceEntity) {
 
         const dimension = world.getDimension(settlement.dimensionId.replace("minecraft:", ""));
         const plan = createInitialSettlementBuildPlan(settlement);
-        placeBuildPlan(dimension, plan.placements, force);
+        await placeBuildPlan(dimension, plan.placements, force);
         print("§aBuilt settlement #" + settlementId + " (" + plan.orientation + ", force=" + force + ").");
         return true;
     }
@@ -930,7 +937,7 @@ function buildSettlementLayoutForTest(payload, sourceEntity) {
 /**
  * Player-only visual test: produces north/east/south/west variants in a facing-relative 2×2 grid.
  */
-function buildOrientationTestGridForTest(payload, sourceEntity) {
+async function buildOrientationTestGridForTest(payload, sourceEntity) {
     if (!isUsableEntity(sourceEntity) || sourceEntity.typeId !== "minecraft:player") {
         print("§cbuildOrientationTestGrid must be invoked directly by a player.");
         return false;
@@ -955,7 +962,7 @@ function buildOrientationTestGridForTest(payload, sourceEntity) {
             });
             allPlacements.push(...plan.placements, variant.labelMarker.stone, variant.labelMarker.sign);
         }
-        placeBuildPlan(sourceEntity.dimension, allPlacements, force);
+        await placeBuildPlan(sourceEntity.dimension, allPlacements, force);
 
         for (const variant of variants) {
             const sign = sourceEntity.dimension.getBlock(variant.labelMarker.sign);
