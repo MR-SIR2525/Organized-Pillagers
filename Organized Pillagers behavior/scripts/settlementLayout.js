@@ -1,10 +1,19 @@
-const TOWN_SQUARE_HALF_SIZE = 8;
-const GOVERNOR_LOT_HALF_WIDTH = 13;
-const GOVERNOR_LOT_FRONT_V = 9;
-const GOVERNOR_LOT_DEPTH = 31;
-const LEVEL_ZERO_HOUSE_HALF_WIDTH = 2;
-const LEVEL_ZERO_HOUSE_FRONT_V = 13;
-const LEVEL_ZERO_HOUSE_DEPTH = 7;
+const PARK_BOUNDS = { minU: -20, maxU: -4, minV: -20, maxV: -4 };
+const ROAD_BOUNDS = [
+    { id: "mainStreet", minU: -34, maxU: 37, minV: -1, maxV: 1 },
+    { id: "centralAvenue", minU: -1, maxU: 1, minV: -27, maxV: 80 },
+    { id: "westAvenue", minU: -27, maxU: -23, minV: -27, maxV: 80 },
+    { id: "northStreet", minU: -27, maxU: 37, minV: 71, maxV: 73 },
+];
+const LOT_BOUNDS = [
+    { id: "W1", minU: -20, maxU: -4, minV: 38, maxV: 54 },
+    { id: "W2", minU: -20, maxU: -4, minV: 21, maxV: 37 },
+    { id: "W3", minU: -20, maxU: -4, minV: 4, maxV: 20 },
+    { id: "E2", minU: 4, maxU: 20, minV: 21, maxV: 37 },
+    { id: "E3", minU: 4, maxU: 20, minV: 4, maxV: 20 },
+    { id: "governorPalace", minU: 4, maxU: 30, minV: 38, maxV: 68 },
+];
+const LOT_CLEARANCE_HEIGHT = 14;
 
 const ORIENTATION_VECTORS = {
     north: { north: { x: 0, z: -1 }, east: { x: 1, z: 0 } },
@@ -17,17 +26,13 @@ function validateSettlement(settlement) {
     if (settlement === null || typeof settlement !== "object") {
         throw new Error("Settlement layout requires a settlement record.");
     }
-
     const { id, center } = settlement;
     if (!Number.isInteger(id) || id < 1) {
         throw new Error("Settlement layout requires a positive integer settlement ID.");
     }
     if (
-        center === null ||
-        typeof center !== "object" ||
-        !Number.isInteger(center.x) ||
-        !Number.isInteger(center.y) ||
-        !Number.isInteger(center.z)
+        center === null || typeof center !== "object"
+        || !Number.isInteger(center.x) || !Number.isInteger(center.y) || !Number.isInteger(center.z)
     ) {
         throw new Error("Settlement layout requires an integer block-grid center.");
     }
@@ -35,9 +40,7 @@ function validateSettlement(settlement) {
 
 function getOrientationVectors(orientation) {
     const vectors = ORIENTATION_VECTORS[orientation];
-    if (vectors === undefined) {
-        throw new Error(`Unknown settlement orientation: ${orientation}.`);
-    }
+    if (vectors === undefined) throw new Error(`Unknown settlement orientation: ${orientation}.`);
     return vectors;
 }
 
@@ -49,66 +52,59 @@ function toWorldLocation(center, vectors, u, v) {
     };
 }
 
-function createFootprint(center, vectors, localBounds) {
+function createArea(center, vectors, { id, minU, maxU, minV, maxV }) {
     const footprint = [];
-    for (let v = localBounds.maxV; v >= localBounds.minV; v -= 1) {
-        for (let u = localBounds.minU; u <= localBounds.maxU; u += 1) {
-            footprint.push(toWorldLocation(center, vectors, u, v));
+    const outline = [];
+    const interior = [];
+    for (let v = maxV; v >= minV; v -= 1) {
+        for (let u = minU; u <= maxU; u += 1) {
+            const location = toWorldLocation(center, vectors, u, v);
+            footprint.push(location);
+            if (u === minU || u === maxU || v === minV || v === maxV) outline.push(location);
+            else interior.push(location);
         }
     }
-    return footprint;
+    return {
+        id,
+        localBounds: { minU, maxU, minV, maxV },
+        footprint,
+        outline,
+        interior,
+    };
 }
 
 /**
- * Produces a deterministic, world-write-free settlement layout plan.
- *
- * The existing settlement center is the exact middle block of the 17 by 17 town square. The
- * governor's 27 by 31 future palace lot is reserved on local north from the first build stage,
- * allowing level upgrades to grow backward and sideways without moving their street frontage.
+ * Produces the permanent road, park, and lot geometry around the registered settlement center.
+ * The center is the mathematical road intersection; every coordinate below is local to the
+ * governor-facing orientation stored on the authoritative settlement record.
  */
 export function createSettlementLayout(settlement, orientation = settlement?.orientation ?? "north") {
     validateSettlement(settlement);
     const vectors = getOrientationVectors(orientation);
     const { center } = settlement;
-
-    const townSquareBounds = {
-        minU: -TOWN_SQUARE_HALF_SIZE,
-        maxU: TOWN_SQUARE_HALF_SIZE,
-        minV: -TOWN_SQUARE_HALF_SIZE,
-        maxV: TOWN_SQUARE_HALF_SIZE,
-    };
-    const governorLotBounds = {
-        minU: -GOVERNOR_LOT_HALF_WIDTH,
-        maxU: GOVERNOR_LOT_HALF_WIDTH,
-        minV: GOVERNOR_LOT_FRONT_V,
-        maxV: GOVERNOR_LOT_FRONT_V + GOVERNOR_LOT_DEPTH - 1,
-    };
-    const levelZeroHouseBounds = {
-        minU: -LEVEL_ZERO_HOUSE_HALF_WIDTH,
-        maxU: LEVEL_ZERO_HOUSE_HALF_WIDTH,
-        minV: LEVEL_ZERO_HOUSE_FRONT_V,
-        maxV: LEVEL_ZERO_HOUSE_FRONT_V + LEVEL_ZERO_HOUSE_DEPTH - 1,
-    };
+    const park = createArea(center, vectors, { id: "park", ...PARK_BOUNDS });
+    const roads = ROAD_BOUNDS.map((road) => createArea(center, vectors, road));
+    const lots = LOT_BOUNDS.map((lot) => {
+        const area = createArea(center, vectors, lot);
+        return {
+            ...area,
+            clearanceHeight: LOT_CLEARANCE_HEIGHT,
+            frontageCenter: toWorldLocation(center, vectors, (lot.minU + lot.maxU) / 2, lot.minV),
+        };
+    });
 
     return {
-        version: 1,
+        version: 2,
         settlementId: settlement.id,
-        center: { x: center.x, y: center.y, z: center.z },
+        centerIntersection: { x: center.x, y: center.y, z: center.z },
         orientation,
-        townSquare: {
-            center: { x: center.x, y: center.y, z: center.z },
-            localBounds: townSquareBounds,
-            footprint: createFootprint(center, vectors, townSquareBounds),
-        },
-        governorLot: {
-            localBounds: governorLotBounds,
-            footprint: createFootprint(center, vectors, governorLotBounds),
-            frontageCenter: toWorldLocation(center, vectors, 0, GOVERNOR_LOT_FRONT_V),
-            levelZeroHouse: {
-                localBounds: levelZeroHouseBounds,
-                footprint: createFootprint(center, vectors, levelZeroHouseBounds),
-                frontDoor: toWorldLocation(center, vectors, 0, LEVEL_ZERO_HOUSE_FRONT_V),
-            },
+        park,
+        roads,
+        lots,
+        governorRow: {
+            westLots: lots.filter((lot) => lot.id.startsWith("W")),
+            eastLots: lots.filter((lot) => lot.id.startsWith("E")),
+            governorPalace: lots.find((lot) => lot.id === "governorPalace"),
         },
     };
 }

@@ -3,10 +3,8 @@ import assert from "node:assert/strict";
 
 import {
     createInitialSettlementBuildPlan,
-    createOrientationTestGrid,
     createPlayerFacingTestLayout,
     createDoorSetblockCommand,
-    splitBuildPlacements,
 } from "../Organized Pillagers behavior/scripts/settlementBuilder.js";
 
 const settlement = {
@@ -16,51 +14,32 @@ const settlement = {
     orientation: "north",
 };
 
-test("createInitialSettlementBuildPlan puts a town-square surface and dirt house at planned coordinates", () => {
+test("createInitialSettlementBuildPlan materializes the park, roads, lots, and lot air clearances", () => {
     const plan = createInitialSettlementBuildPlan(settlement);
 
     assert.equal(plan.settlementId, 5);
     assert.equal(plan.orientation, "north");
-    assert.equal(plan.placements.length, 419);
-    assert.deepEqual(plan.placements[0], { x: 92, y: 70, z: -208, typeId: "minecraft:cobblestone" });
     assert.ok(plan.placements.some((block) =>
-        block.x === 100 && block.y === 71 && block.z === -213 && block.typeId === "minecraft:wooden_door"
+        block.x === 80 && block.y === 70 && block.z === -180 && block.typeId === "minecraft:stone"
     ));
+    assert.ok(plan.placements.some((block) =>
+        block.x === 88 && block.y === 70 && block.z === -188 && block.typeId === "minecraft:grass_block"
+    ));
+    assert.ok(plan.placements.some((block) =>
+        block.x === 100 && block.y === 70 && block.z === -200 && block.typeId === "minecraft:grass_path"
+    ));
+    assert.ok(plan.placements.some((block) =>
+        block.x === 80 && block.y === 70 && block.z === -204 && block.typeId === "minecraft:gray_concrete"
+    ));
+    assert.ok(plan.placements.some((block) =>
+        block.x === 81 && block.y === 70 && block.z === -205 && block.typeId === "minecraft:grass_block"
+    ));
+    assert.ok(plan.placements.some((block) =>
+        block.x === 80 && block.y === 84 && block.z === -204 && block.typeId === "minecraft:air"
+    ));
+    assert.equal(plan.placements.some((block) => block.typeId === "minecraft:wooden_door"), false);
 });
 
-test("createInitialSettlementBuildPlan faces the lower door toward the house frontage for every orientation", () => {
-    const expectedDoors = {
-        north: { x: 100, y: 71, z: -213 },
-        east: { x: 113, y: 71, z: -200 },
-        south: { x: 100, y: 71, z: -187 },
-        west: { x: 87, y: 71, z: -200 },
-    };
-
-    for (const [orientation, location] of Object.entries(expectedDoors)) {
-        const plan = createInitialSettlementBuildPlan({ ...settlement, orientation });
-        const door = plan.placements.find((block) => block.typeId === "minecraft:wooden_door");
-
-        assert.deepEqual(door, {
-            ...location,
-            typeId: "minecraft:wooden_door",
-            states: { "minecraft:cardinal_direction": orientation },
-        });
-        assert.equal(plan.placements.filter((block) => block.typeId === "minecraft:wooden_door").length, 1);
-        assert.ok(plan.placements.some((block) =>
-            block.x === location.x && block.y === location.y + 1 && block.z === location.z
-            && block.typeId === "minecraft:air"
-        ));
-    }
-});
-test("splitBuildPlacements reserves every door for the final placement pass", () => {
-    const plan = createInitialSettlementBuildPlan(settlement);
-    const { structure, doors } = splitBuildPlacements(plan.placements);
-
-    assert.equal(doors.length, 1);
-    assert.equal(doors[0].typeId, "minecraft:wooden_door");
-    assert.ok(structure.every((placement) => placement.typeId !== "minecraft:wooden_door"));
-    assert.ok(structure.some((placement) => placement.typeId === "minecraft:air"));
-});
 test("createDoorSetblockCommand translates local-north orientation to the door state that faces it", () => {
     assert.equal(
         createDoorSetblockCommand({ x: 10, y: 64, z: -3 }, "north"),
@@ -77,24 +56,4 @@ test("createPlayerFacingTestLayout uses the invoking player's cardinal facing at
     assert.equal(plan.settlementId, 1);
     assert.equal(plan.orientation, "west");
     assert.deepEqual(plan.center, { x: 40, y: 72, z: -18 });
-});
-test("createOrientationTestGrid makes four labeled build plans in a facing-relative two-by-two grid", () => {
-    const grid = createOrientationTestGrid({ x: 0, y: 64, z: 0 }, "east");
-
-    assert.deepEqual(grid.map(({ orientation, center, label }) => ({ orientation, center, label })), [
-        { orientation: "north", center: { x: 0, y: 64, z: 0 }, label: "North" },
-        { orientation: "east", center: { x: 0, y: 64, z: 64 }, label: "East" },
-        { orientation: "south", center: { x: 64, y: 64, z: 0 }, label: "South" },
-        { orientation: "west", center: { x: 64, y: 64, z: 64 }, label: "West" },
-    ]);
-    assert.deepEqual(grid[0].labelMarker, {
-        stone: { x: 0, y: 74, z: 0, typeId: "minecraft:stone" },
-        sign: {
-            x: 0,
-            y: 75,
-            z: 0,
-            typeId: "minecraft:standing_sign",
-            states: { "ground_sign_direction": 8 },
-        },
-    });
 });

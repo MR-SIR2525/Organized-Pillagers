@@ -9,7 +9,6 @@ import {
 } from "./settlementRegistry.js";
 import {
     createInitialSettlementBuildPlan,
-    createOrientationTestGrid,
     createPlayerFacingTestLayout,
     createDoorSetblockCommand,
     splitBuildPlacements,
@@ -106,9 +105,6 @@ system.afterEvents.scriptEventReceive.subscribe(async (event) => {
                 break;
             case "buildSettlementLayout":
                 buildSettlementLayoutForTest(payload, sourceEntity);
-                break;
-            case "buildOrientationTestGrid":
-                buildOrientationTestGridForTest(payload, sourceEntity);
                 break;
             case "buildFacingTestLayout":
             case "buildTestLayout":     // friendly alias
@@ -975,49 +971,6 @@ function buildFacingTestLayoutForTest(payload, sourceEntity) {
 }
 
 /**
- * Player-only visual test: produces north/east/south/west variants in a facing-relative 2×2 grid.
- */
-function buildOrientationTestGridForTest(payload, sourceEntity) {
-    if (!isUsableEntity(sourceEntity) || sourceEntity.typeId !== "minecraft:player") {
-        print("§cbuildOrientationTestGrid must be invoked directly by a player.");
-        return false;
-    }
-
-    try {
-        const force = parseForceFlag(payload.trim());
-        const origin = {
-            x: Math.floor(sourceEntity.location.x),
-            y: Math.floor(sourceEntity.location.y),
-            z: Math.floor(sourceEntity.location.z),
-        };
-        const playerFacing = get_cardinal_direction(sourceEntity.getRotation().y);
-        const variants = createOrientationTestGrid(origin, playerFacing);
-        const allPlacements = [];
-        for (const [index, variant] of variants.entries()) {
-            const plan = createInitialSettlementBuildPlan({
-                id: index + 1,
-                dimensionId: sourceEntity.dimension.id,
-                center: variant.center,
-                orientation: variant.orientation,
-            });
-            allPlacements.push(...plan.placements, variant.labelMarker.stone, variant.labelMarker.sign);
-        }
-        placeBuildPlan(sourceEntity.dimension, allPlacements, force);
-
-        for (const variant of variants) {
-            const sign = sourceEntity.dimension.getBlock(variant.labelMarker.sign);
-            sign?.getComponent(BlockComponentTypes.Sign)?.setText(variant.label + " orientation");
-        }
-        print("§aBuilt four orientation test layouts (force=" + force + ").");
-        return true;
-    }
-    catch (error) {
-        print("§cCould not build orientation test grid: " + error);
-        return false;
-    }
-}
-
-/**
  * Resolves and reports the deterministic initial layout for an existing governor's settlement.
  * This is deliberately a no-world-write preview: it lets a test governor verify its center,
  * orientation, town square, and reserved palace lot before a build executor is introduced.
@@ -1042,16 +995,19 @@ function previewSettlementLayout(sourceEntity) {
         // for this preview. Newly registered settlements use their persisted orientation instead.
         const orientation = settlement.orientation ?? get_cardinal_direction(sourceEntity.getRotation().y);
         const layout = createSettlementLayout(settlement, orientation);
-        const { center } = layout;
-        const { localBounds: squareBounds } = layout.townSquare;
-        const { localBounds: lotBounds, frontageCenter } = layout.governorLot;
+        const { centerIntersection, park, roads, governorRow: { governorPalace } } = layout;
+        const { localBounds: parkBounds } = park;
+        const { localBounds: palaceBounds, frontageCenter } = governorPalace;
 
         print("§aSettlement #" + settlementId + " layout preview (" + layout.orientation + "):"
-            + " square " + (squareBounds.maxU - squareBounds.minU + 1) + "x"
-            + (squareBounds.maxV - squareBounds.minV + 1) + " centered at "
-            + center.x + " " + center.y + " " + center.z + ".");
-        print("§aGovernor lot " + (lotBounds.maxU - lotBounds.minU + 1) + "x"
-            + (lotBounds.maxV - lotBounds.minV + 1) + " begins at "
+            + " road intersection at " + centerIntersection.x + " " + centerIntersection.y + " " + centerIntersection.z
+            + "; park " + (parkBounds.maxU - parkBounds.minU + 1) + "x"
+            + (parkBounds.maxV - parkBounds.minV + 1) + ".");
+        print("§aRoads: " + roads.map((road) => road.id + " "
+            + (road.localBounds.maxU - road.localBounds.minU + 1) + "x"
+            + (road.localBounds.maxV - road.localBounds.minV + 1)).join(", ") + ".");
+        print("§aGovernor palace lot " + (palaceBounds.maxU - palaceBounds.minU + 1) + "x"
+            + (palaceBounds.maxV - palaceBounds.minV + 1) + " begins at "
             + frontageCenter.x + " " + frontageCenter.y + " " + frontageCenter.z + ".");
         return true;
     }

@@ -1,19 +1,5 @@
 import { createSettlementLayout } from "./settlementLayout.js";
 
-const CARDINAL_VECTORS = {
-    north: { forward: { x: 0, z: -1 }, right: { x: 1, z: 0 } },
-    east: { forward: { x: 1, z: 0 }, right: { x: 0, z: 1 } },
-    south: { forward: { x: 0, z: 1 }, right: { x: -1, z: 0 } },
-    west: { forward: { x: -1, z: 0 }, right: { x: 0, z: -1 } },
-};
-
-const GROUND_SIGN_DIRECTIONS = {
-    south: 0,
-    west: 4,
-    north: 8,
-    east: 12,
-};
-
 // Door cardinal_direction must rotate one quarter-turn counterclockwise from the visual frontage.
 const DOOR_STATE_DIRECTIONS = {
     north: "west",
@@ -21,20 +7,6 @@ const DOOR_STATE_DIRECTIONS = {
     south: "east",
     west: "south",
 };
-
-function getVectors(orientation) {
-    const vectors = CARDINAL_VECTORS[orientation];
-    if (vectors === undefined) throw new Error(`Unknown orientation: ${orientation}.`);
-    return vectors;
-}
-
-function toWorld(center, vectors, u, v, yOffset = 0) {
-    return {
-        x: center.x + u * vectors.right.x + v * vectors.forward.x,
-        y: center.y + yOffset,
-        z: center.z + u * vectors.right.z + v * vectors.forward.z,
-    };
-}
 
 function block(location, typeId, states = undefined) {
     return states === undefined ? { ...location, typeId } : { ...location, typeId, states };
@@ -61,60 +33,38 @@ export function splitBuildPlacements(placements) {
 }
 
 /**
- * Produces the first physical settlement stage: a cobblestone town square and a compact dirt
- * governor house inside the permanently reserved lot. It is pure so callers can preflight it.
+ * Produces the first physical settlement stage: roads, the bordered park, and the bordered empty
+ * lots. Lots deliberately receive fourteen clear air blocks above each ground cell, reserving the
+ * volume for later structures while keeping a rebuild deterministic.
  */
 export function createInitialSettlementBuildPlan(settlement, orientation = settlement?.orientation ?? "north") {
     const layout = createSettlementLayout(settlement, orientation);
-    const vectors = getVectors(orientation);
-    const placements = [];
+    const placementsByPosition = new Map();
+    const add = (location, typeId) => {
+        placementsByPosition.set(`${location.x},${location.y},${location.z}`, block(location, typeId));
+    };
 
-    for (const location of layout.townSquare.footprint) {
-        placements.push(block(location, "minecraft:cobblestone"));
+    for (const road of layout.roads) {
+        for (const location of road.footprint) add(location, "minecraft:grass_path");
     }
+    for (const location of layout.park.outline) add(location, "minecraft:stone");
+    for (const location of layout.park.interior) add(location, "minecraft:grass_block");
 
-    const house = layout.governorLot.levelZeroHouse;
-    const bounds = house.localBounds;
-    for (let v = bounds.minV; v <= bounds.maxV; v += 1) {
-        for (let u = bounds.minU; u <= bounds.maxU; u += 1) {
-            const location = toWorld(settlement.center, vectors, u, v);
-            placements.push(block(location, "minecraft:dirt"));
-
-            const isWall = u === bounds.minU || u === bounds.maxU || v === bounds.minV || v === bounds.maxV;
-            if (isWall) {
-                for (let yOffset = 1; yOffset <= 3; yOffset += 1) {
-                    placements.push(block({ ...location, y: location.y + yOffset }, "minecraft:dirt"));
-                }
+    for (const lot of layout.lots) {
+        for (const location of lot.outline) add(location, "minecraft:gray_concrete");
+        for (const location of lot.interior) add(location, "minecraft:grass_block");
+        for (const location of lot.footprint) {
+            for (let yOffset = 1; yOffset <= lot.clearanceHeight; yOffset += 1) {
+                add({ ...location, y: location.y + yOffset }, "minecraft:air");
             }
-            placements.push(block({ ...location, y: location.y + 4 }, "minecraft:oak_planks"));
         }
     }
-
-    // The first local-north wall is the street frontage.
-    const door = house.frontDoor;
-    const index = placements.findIndex((placement) =>
-        placement.x === door.x && placement.y === door.y + 1 && placement.z === door.z
-    );
-    // Only place the lower half; Bedrock creates/replaces the upper half. Cardinal direction must
-    // match the local-north frontage so the door opens from the intended side of each variant.
-    const doorPlacement = block(
-        { ...door, y: door.y + 1 },
-        "minecraft:wooden_door",
-        { "minecraft:cardinal_direction": orientation }
-    );
-    // Put the upper half in the plan as air before the lower half is placed. Unlike /setblock,
-    // Script API permutation placement does not clear a blocking upper block automatically.
-    const upperIndex = placements.findIndex((placement) =>
-        placement.x === door.x && placement.y === door.y + 2 && placement.z === door.z
-    );
-    placements[upperIndex] = block({ ...door, y: door.y + 2 }, "minecraft:air");
-    placements[index] = doorPlacement;
 
     return {
         settlementId: settlement.id,
         center: { ...settlement.center },
         orientation,
-        placements,
+        placements: [...placementsByPosition.values()],
     };
 }
 
@@ -128,43 +78,5 @@ export function createPlayerFacingTestLayout(origin, playerFacing) {
         dimensionId: "minecraft:overworld",
         center: origin,
         orientation: playerFacing,
-    });
-}
-
-/**
- * Creates four test builds in a two-by-two grid relative to the invoking player's facing.
- */
-export function createOrientationTestGrid(origin, playerFacing, spacing = 64) {
-    if (!Number.isInteger(origin?.x) || !Number.isInteger(origin?.y) || !Number.isInteger(origin?.z)) {
-        throw new Error("Orientation test grid requires an integer block-grid origin.");
-    }
-    if (!Number.isInteger(spacing) || spacing < 1) {
-        throw new Error("Orientation test grid spacing must be a positive integer.");
-    }
-
-    const vectors = getVectors(playerFacing);
-    const variants = ["north", "east", "south", "west"];
-    return variants.map((orientation, index) => {
-        const forwardSteps = index >= 2 ? spacing : 0;
-        const rightSteps = index % 2 === 1 ? spacing : 0;
-        const center = {
-            x: origin.x + forwardSteps * vectors.forward.x + rightSteps * vectors.right.x,
-            y: origin.y,
-            z: origin.z + forwardSteps * vectors.forward.z + rightSteps * vectors.right.z,
-        };
-        const label = orientation[0].toUpperCase() + orientation.slice(1);
-        return {
-            orientation,
-            center,
-            label,
-            labelMarker: {
-                stone: block({ ...center, y: center.y + 10 }, "minecraft:stone"),
-                sign: block(
-                    { ...center, y: center.y + 11 },
-                    "minecraft:standing_sign",
-                    { "ground_sign_direction": GROUND_SIGN_DIRECTIONS[orientation] }
-                ),
-            },
-        };
     });
 }
