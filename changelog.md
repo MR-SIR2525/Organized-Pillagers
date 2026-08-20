@@ -1,7 +1,12 @@
+### 2026-08-19 — `v0.0.124`
+- corrected initial governor-house door placement: layouts establish the upper clearance first, then use Minecraft’s built-in directional `setblock` door command with the required quarter-turn state translation rather than Script API block permutations
+- removed the temporary manual-door probe after native `setblock` behavior was verified
+
 ### 2026-08-19 — `v0.0.123`
-- corrected initial governor-house door placement: builds now place only the lower `minecraft:wooden_door` block and apply the stored local-north cardinal direction through a block permutation
-- added coverage for north, east, south, and west door location/direction variants
-- corrected orientation-test labels to use the valid generic `minecraft:sign` block
+- created a test build command to test town center building
+- added coverage for north, east, south, and west door location/direction variants, and split layout placement into structure-first and door-final passes
+- added a player-facing single-layout build probe
+- corrected orientation-test labels to use a directional `minecraft:standing_sign` block
 
 ### 2026-08-19 — `v0.0.122`
 - added a force-aware physical initial-build executor: default placement soft-overwrites terrain/liquids but preflights portal, obsidian, and inventory/container blocks; explicit `true` permits forced rebuilds
