@@ -156,7 +156,7 @@ Force does **not** bypass settlement-record validation or change the record’s 
 /scriptevent op:test buildOrientationTestGrid
 ```
 
-Player-only test action. It starts at the invoking player’s floored block location and lays out four builds in a facing-relative 2×2 grid, 64 blocks apart: north, east, south, and west variants. Each center gets a floating stone block ten blocks above it and an oak sign above that reading the orientation.
+Player-only test action. It starts at the invoking player’s floored block location and lays out four builds in a facing-relative 2×2 grid, 64 blocks apart: north, east, south, and west variants. Each center gets a floating stone block ten blocks above it and a sign above that reading the orientation.
 
 Use `true` only to overwrite protected blocks deliberately:
 
