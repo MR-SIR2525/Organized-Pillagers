@@ -1,3 +1,8 @@
+### 2026-08-19 — `v0.0.123`
+- corrected initial governor-house door placement: builds now place only the lower `minecraft:wooden_door` block and apply the stored local-north cardinal direction through a block permutation
+- added coverage for north, east, south, and west door location/direction variants
+- corrected orientation-test labels to use the valid generic `minecraft:sign` block
+
 ### 2026-08-19 — `v0.0.122`
 - added a force-aware physical initial-build executor: default placement soft-overwrites terrain/liquids but preflights portal, obsidian, and inventory/container blocks; explicit `true` permits forced rebuilds
 - added player/server and settlement-member build commands plus a player-facing four-orientation grid test with floating stone/sign labels
