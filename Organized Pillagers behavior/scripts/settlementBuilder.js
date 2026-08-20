@@ -14,6 +14,14 @@ const GROUND_SIGN_DIRECTIONS = {
     east: 12,
 };
 
+// Door cardinal_direction must rotate one quarter-turn counterclockwise from the visual frontage.
+const DOOR_STATE_DIRECTIONS = {
+    north: "west",
+    east: "north",
+    south: "east",
+    west: "south",
+};
+
 function getVectors(orientation) {
     const vectors = CARDINAL_VECTORS[orientation];
     if (vectors === undefined) throw new Error(`Unknown orientation: ${orientation}.`);
@@ -30,6 +38,26 @@ function toWorld(center, vectors, u, v, yOffset = 0) {
 
 function block(location, typeId, states = undefined) {
     return states === undefined ? { ...location, typeId } : { ...location, typeId, states };
+}
+
+/**
+ * Uses the game's setblock grammar for doors rather than emulating its multi-block placement.
+ */
+export function createDoorSetblockCommand(location, orientation) {
+    const direction = DOOR_STATE_DIRECTIONS[orientation];
+    if (direction === undefined) throw new Error(`Unknown door orientation: ${orientation}.`);
+    return `setblock ${location.x} ${location.y} ${location.z} minecraft:wooden_door ["minecraft:cardinal_direction"="${direction}"]`;
+}
+
+/**
+ * Separates structural writes from multi-block door commands so every non-door block is settled
+ * before vanilla command handling creates the doors.
+ */
+export function splitBuildPlacements(placements) {
+    return {
+        structure: placements.filter((placement) => placement.typeId !== "minecraft:wooden_door"),
+        doors: placements.filter((placement) => placement.typeId === "minecraft:wooden_door"),
+    };
 }
 
 /**
@@ -74,8 +102,12 @@ export function createInitialSettlementBuildPlan(settlement, orientation = settl
         "minecraft:wooden_door",
         { "minecraft:cardinal_direction": orientation }
     );
-    doorPlacement.clearUpperBeforePlacement = true;
-    doorPlacement.placementDelayTicks = 10;
+    // Put the upper half in the plan as air before the lower half is placed. Unlike /setblock,
+    // Script API permutation placement does not clear a blocking upper block automatically.
+    const upperIndex = placements.findIndex((placement) =>
+        placement.x === door.x && placement.y === door.y + 2 && placement.z === door.z
+    );
+    placements[upperIndex] = block({ ...door, y: door.y + 2 }, "minecraft:air");
     placements[index] = doorPlacement;
 
     return {
@@ -84,6 +116,19 @@ export function createInitialSettlementBuildPlan(settlement, orientation = settl
         orientation,
         placements,
     };
+}
+
+/**
+ * Produces one disposable layout at an invoking player's floored location and facing. It has no
+ * registry side effects: the synthetic ID is only required by the pure layout validation contract.
+ */
+export function createPlayerFacingTestLayout(origin, playerFacing) {
+    return createInitialSettlementBuildPlan({
+        id: 1,
+        dimensionId: "minecraft:overworld",
+        center: origin,
+        orientation: playerFacing,
+    });
 }
 
 /**

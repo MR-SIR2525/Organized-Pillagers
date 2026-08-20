@@ -4,6 +4,9 @@ import assert from "node:assert/strict";
 import {
     createInitialSettlementBuildPlan,
     createOrientationTestGrid,
+    createPlayerFacingTestLayout,
+    createDoorSetblockCommand,
+    splitBuildPlacements,
 } from "../Organized Pillagers behavior/scripts/settlementBuilder.js";
 
 const settlement = {
@@ -41,11 +44,39 @@ test("createInitialSettlementBuildPlan faces the lower door toward the house fro
             ...location,
             typeId: "minecraft:wooden_door",
             states: { "minecraft:cardinal_direction": orientation },
-            clearUpperBeforePlacement: true,
-            placementDelayTicks: 10,
         });
         assert.equal(plan.placements.filter((block) => block.typeId === "minecraft:wooden_door").length, 1);
+        assert.ok(plan.placements.some((block) =>
+            block.x === location.x && block.y === location.y + 1 && block.z === location.z
+            && block.typeId === "minecraft:air"
+        ));
     }
+});
+test("splitBuildPlacements reserves every door for the final placement pass", () => {
+    const plan = createInitialSettlementBuildPlan(settlement);
+    const { structure, doors } = splitBuildPlacements(plan.placements);
+
+    assert.equal(doors.length, 1);
+    assert.equal(doors[0].typeId, "minecraft:wooden_door");
+    assert.ok(structure.every((placement) => placement.typeId !== "minecraft:wooden_door"));
+    assert.ok(structure.some((placement) => placement.typeId === "minecraft:air"));
+});
+test("createDoorSetblockCommand translates local-north orientation to the door state that faces it", () => {
+    assert.equal(
+        createDoorSetblockCommand({ x: 10, y: 64, z: -3 }, "north"),
+        'setblock 10 64 -3 minecraft:wooden_door ["minecraft:cardinal_direction"="west"]'
+    );
+    assert.equal(
+        createDoorSetblockCommand({ x: 10, y: 64, z: -3 }, "east"),
+        'setblock 10 64 -3 minecraft:wooden_door ["minecraft:cardinal_direction"="north"]'
+    );
+});
+test("createPlayerFacingTestLayout uses the invoking player's cardinal facing at its block-grid origin", () => {
+    const plan = createPlayerFacingTestLayout({ x: 40, y: 72, z: -18 }, "west");
+
+    assert.equal(plan.settlementId, 1);
+    assert.equal(plan.orientation, "west");
+    assert.deepEqual(plan.center, { x: 40, y: 72, z: -18 });
 });
 test("createOrientationTestGrid makes four labeled build plans in a facing-relative two-by-two grid", () => {
     const grid = createOrientationTestGrid({ x: 0, y: 64, z: 0 }, "east");
