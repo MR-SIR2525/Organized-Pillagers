@@ -21,8 +21,8 @@ function toWorld(center, vectors, u, v, yOffset = 0) {
     };
 }
 
-function block(location, typeId) {
-    return { ...location, typeId };
+function block(location, typeId, states = undefined) {
+    return states === undefined ? { ...location, typeId } : { ...location, typeId, states };
 }
 
 /**
@@ -55,14 +55,18 @@ export function createInitialSettlementBuildPlan(settlement, orientation = settl
         }
     }
 
-    // The first local-north wall is the street frontage. Replace its center two wall blocks with a door.
+    // The first local-north wall is the street frontage.
     const door = house.frontDoor;
-    for (let yOffset = 1; yOffset <= 2; yOffset += 1) {
-        const index = placements.findIndex((placement) =>
-            placement.x === door.x && placement.y === door.y + yOffset && placement.z === door.z
-        );
-        placements[index] = block({ ...door, y: door.y + yOffset }, "minecraft:wooden_door");
-    }
+    const index = placements.findIndex((placement) =>
+        placement.x === door.x && placement.y === door.y + 1 && placement.z === door.z
+    );
+    // Only place the lower half; Bedrock creates/replaces the upper half. Cardinal direction must
+    // match the local-north frontage so the door opens from the intended side of each variant.
+    placements[index] = block(
+        { ...door, y: door.y + 1 },
+        "minecraft:wooden_door",
+        { "minecraft:cardinal_direction": orientation }
+    );
 
     return {
         settlementId: settlement.id,
