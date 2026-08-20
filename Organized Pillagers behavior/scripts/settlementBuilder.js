@@ -61,7 +61,7 @@ export function createInitialSettlementBuildPlan(settlement, orientation = settl
         const index = placements.findIndex((placement) =>
             placement.x === door.x && placement.y === door.y + yOffset && placement.z === door.z
         );
-        placements[index] = block({ ...door, y: door.y + yOffset }, "minecraft:oak_door");
+        placements[index] = block({ ...door, y: door.y + yOffset }, "minecraft:wooden_door");
     }
 
     return {
@@ -100,7 +100,7 @@ export function createOrientationTestGrid(origin, playerFacing, spacing = 64) {
             label,
             labelMarker: {
                 stone: block({ ...center, y: center.y + 10 }, "minecraft:stone"),
-                sign: block({ ...center, y: center.y + 11 }, "minecraft:oak_sign"),
+                sign: block({ ...center, y: center.y + 11 }, "minecraft:sign"),
             },
         };
     });

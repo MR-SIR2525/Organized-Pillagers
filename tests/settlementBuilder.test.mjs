@@ -21,7 +21,7 @@ test("createInitialSettlementBuildPlan puts a town-square surface and dirt house
     assert.equal(plan.placements.length, 419);
     assert.deepEqual(plan.placements[0], { x: 92, y: 70, z: -208, typeId: "minecraft:cobblestone" });
     assert.ok(plan.placements.some((block) =>
-        block.x === 100 && block.y === 71 && block.z === -213 && block.typeId === "minecraft:oak_door"
+        block.x === 100 && block.y === 71 && block.z === -213 && block.typeId === "minecraft:wooden_door"
     ));
 });
 

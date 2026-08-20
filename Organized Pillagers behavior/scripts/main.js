@@ -386,7 +386,7 @@ function containsNoGoBlocks(dimension, x, y, z, radius, height, depth) {
 
         // Wooden Doors
         "minecraft:acacia_door", "minecraft:bamboo_door", "minecraft:birch_door", "minecraft:crimson_door",
-        "minecraft:dark_oak_door", "minecraft:jungle_door", "minecraft:oak_door", "minecraft:spruce_door",
+        "minecraft:dark_oak_door", "minecraft:jungle_door", "minecraft:wooden_door", "minecraft:spruce_door",
         "minecraft:warped_door",
 
         // Non-Wooden Doors
