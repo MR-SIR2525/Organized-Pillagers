@@ -1,3 +1,10 @@
+### 2026-08-19 — `v0.0.130`
+- replaced the initial cobblestone-square / dirt-house probe with the persisted-orientation road, park, and empty-lot layout
+- made the registered settlement center the mathematical road intersection; roads use `grass_path`, with three-block standard widths and the five-block western avenue
+- added a stone-outlined 17×17 grass park, five bordered 17×17 Governor’s Row lots, and the relocated 27×31 governor-palace lot
+- clear fourteen blocks of air above each lot for future structures
+- removed the now-redundant four-layout orientation-grid test command and its visual markers
+
 ### 2026-08-19 — `v0.0.124`
 - corrected initial governor-house door placement: layouts establish the upper clearance first, then use Minecraft’s built-in directional `setblock` door command with the required quarter-turn state translation rather than Script API block permutations
 - removed the temporary manual-door probe after native `setblock` behavior was verified

@@ -34,7 +34,7 @@ Then target it with:
 /scriptevent op:test <action> [arguments]
 ```
 
-Most actions need an entity source. Run them through a persistent pillager so Script API receives that entity as `sourceEntity`:
+Most, but not all, actions need an entity source. Run them through a persistent pillager so Script API receives that entity as `sourceEntity`:
 
 ```mcfunction
 /execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test <action> [arguments]
@@ -43,7 +43,7 @@ Most actions need an entity source. Run them through a persistent pillager so Sc
 ### `getFacing`
 
 ```mcfunction
-/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test getFacing
+/scriptevent op:test getFacing
 ```
 
 Prints the source pillager's cardinal direction (`north`, `south`, `east`, or `west`) from its Y rotation.
@@ -53,7 +53,7 @@ Prints the source pillager's cardinal direction (`north`, `south`, `east`, or `w
 ### `getYRot`
 
 ```mcfunction
-/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test getYRot
+/scriptevent op:test getYRot
 ```
 
 Prints the source pillager's raw Y rotation to two decimal places.
@@ -61,7 +61,7 @@ Prints the source pillager's raw Y rotation to two decimal places.
 ### `getBlock x y z`
 
 ```mcfunction
-/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test getBlock 10 64 -20
+/scriptevent op:test getBlock 10 64 -20
 ```
 
 Reads and prints the block ID at the supplied coordinates in the source pillager's dimension.
@@ -92,7 +92,7 @@ This is diagnostic only; it does not register a settlement or change entity stat
 ### `visualize`
 
 ```mcfunction
-/execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test visualize
+/scriptevent op:test visualize
 ```
 
 Visualizes the no-go-block scan around the source pillager by placing white concrete.
@@ -124,9 +124,9 @@ The entity event below is a shorter alternate trigger for the same script action
 /execute as @e[type=op:persistent_pillager,c=1] at @s run scriptevent op:test previewSettlementLayout
 ```
 
-Loads the source governor's `op:settlementId`, resolves the authoritative registry record, and prints the planned town-square and governor-lot dimensions, center, frontage, and orientation.
+Loads the source governor's `op:settlementId`, resolves the authoritative registry record, and prints the planned road intersection, park, roads, governor-palace lot, frontage, and orientation.
 
-This is a **no-world-write preview**. It does not place the square or dirt house. For legacy settlement records that predate persisted orientation, it previews using the governor's current facing direction.
+This is a **no-world-write preview**. It does not place roads, the park, or lots. For legacy settlement records that predate persisted orientation, it previews using the governor's current facing direction.
 
 ### `buildSettlementLayout [<settlementId>] [true|false]`
 
@@ -142,7 +142,7 @@ As a player/server command, supply the authoritative settlement ID:
 /scriptevent op:test buildSettlementLayout 4
 ```
 
-The first physical stage places a cobblestone 17×17 square and the compact dirt governor house from the stored orientation-aware plan. Default `false` uses a blacklist preflight: it refuses to overwrite end/nether portal blocks, obsidian, crying obsidian, or any inventory/container block. Natural terrain, water, and lava remain replaceable. Pass `true` to intentionally bypass that overwrite protection:
+The first physical stage places `grass_path` roads (three blocks wide except the five-wide western avenue), a stone-outlined 17×17 grass park, and grey-concrete-outlined grass lots. It also clears the fourteen blocks above every lot for future structures. Default `false` uses a blacklist preflight: it refuses to overwrite end/nether portal blocks, obsidian, crying obsidian, or any inventory/container block. Natural terrain, water, and lava remain replaceable. Pass `true` to intentionally bypass that overwrite protection:
 
 ```mcfunction
 /scriptevent op:test buildSettlementLayout 4 true
@@ -150,19 +150,13 @@ The first physical stage places a cobblestone 17×17 square and the compact dirt
 
 Force does **not** bypass settlement-record validation or change the record’s destination dimension.
 
-### `buildOrientationTestGrid [true|false]`
+### `buildFacingTestLayout [true|false]`
 
 ```mcfunction
-/scriptevent op:test buildOrientationTestGrid
+/scriptevent op:test buildFacingTestLayout
 ```
 
-Player-only test action. It starts at the invoking player’s floored block location and lays out four builds in a facing-relative 2×2 grid, 64 blocks apart: north, east, south, and west variants. Each center gets a floating stone block ten blocks above it and a sign above that reading the orientation.
-
-Use `true` only to overwrite protected blocks deliberately:
-
-```mcfunction
-/scriptevent op:test buildOrientationTestGrid true
-```
+Player-only test action. It builds one disposable layout centered at the player’s floored block position, using the player’s current cardinal facing as the layout orientation. Use `true` only to force overwrite protection bypass.
 
 ### `deactivateSettlement <settlementId>`
 
