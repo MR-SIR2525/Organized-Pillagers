@@ -1,4 +1,4 @@
-import { world, system, BlockComponentTypes } from "@minecraft/server";
+import { world, system, BlockComponentTypes, BlockPermutation } from "@minecraft/server";
 
 import {
     assignSettlementMembership,
@@ -869,7 +869,17 @@ function placeBuildPlan(dimension, placements, force) {
     }
 
     for (const placement of placements) {
-        dimension.setBlockType(placement, placement.typeId);
+        if (placement.states === undefined) {
+            dimension.setBlockType(placement, placement.typeId);
+        }
+        else {
+            const target = dimension.getBlock(placement);
+            if (target === undefined) {
+                throw new Error("Target block became unavailable during placement at "
+                    + placement.x + " " + placement.y + " " + placement.z + ".");
+            }
+            target.setPermutation(BlockPermutation.resolve(placement.typeId, placement.states));
+        }
     }
 }
 
