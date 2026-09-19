@@ -142,7 +142,7 @@ As a player/server command, supply the authoritative settlement ID:
 /scriptevent op:test buildSettlementLayout 4
 ```
 
-The first physical stage places `grass_path` roads (three blocks wide except the five-wide western avenue), a stone-outlined 17×17 grass park, and grey-concrete-outlined grass lots. It also clears the fourteen blocks above every lot for future structures. Default `false` uses a blacklist preflight: it refuses to overwrite end/nether portal blocks, obsidian, crying obsidian, or any inventory/container block. Natural terrain, water, and lava remain replaceable. Pass `true` to intentionally bypass that overwrite protection:
+The first physical stage places `grass_path` roads (three blocks wide except the five-wide western avenue), a stone-outlined 17×17 grass park, and grey-concrete-outlined grass lots. Roads now retain a one-block buffer from the park and lots. The build clears the fourteen blocks above every lot, then loads `house_long` into each regular Governor’s Row lot: the twelve-block-wide house is centered as closely as possible, placed directly inside its road-side border, and aligned to the lot surface after its saved-ground offset was live-tested. Default `false` uses a blacklist preflight: it refuses to overwrite end/nether portal blocks, obsidian, crying obsidian, or any inventory/container block. Natural terrain, water, and lava remain replaceable. Pass `true` to intentionally bypass that overwrite protection:
 
 ```mcfunction
 /scriptevent op:test buildSettlementLayout 4 true
@@ -150,13 +150,13 @@ The first physical stage places `grass_path` roads (three blocks wide except the
 
 Force does **not** bypass settlement-record validation or change the record’s destination dimension.
 
-### `buildFacingTestLayout [true|false]`
+### `buildTestLayout [true|false]`
 
 ```mcfunction
 /scriptevent op:test buildFacingTestLayout
 ```
 
-Player-only test action. It builds one disposable layout centered at the player’s floored block position, using the player’s current cardinal facing as the layout orientation. Use `true` only to force overwrite protection bypass.
+Player-only test action. It grounds the disposable layout at `player.y - 0.75` before flooring, so grass paths and other shorter collision surfaces do not raise the build. It uses the player’s current cardinal facing as layout orientation and places a floating stone/sign marker over the road intersection labeled with that orientation. Use `true` only to force overwrite protection bypass. Has an alias: *buildFacingTestLayout*.
 
 ### `deactivateSettlement <settlementId>`
 

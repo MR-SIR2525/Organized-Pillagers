@@ -1,3 +1,8 @@
+### 2026-08-19 — `v0.0.131`
+- reduced the road clearance around the park and lots from two blocks to one
+- populate the five regular Governor’s Row lots with rotated `house_long` test houses, centered within each 17-wide lot and aligned to the lot surface after live testing
+- added a floating orientation sign above each player-facing test build and grounded that build from `player.y - 0.75` before flooring
+
 ### 2026-08-19 — `v0.0.130`
 - replaced the initial cobblestone-square / dirt-house probe with the persisted-orientation road, park, and empty-lot layout
 - made the registered settlement center the mathematical road intersection; roads use `grass_path`, with three-block standard widths and the five-block western avenue

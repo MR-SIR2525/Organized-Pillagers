@@ -1,17 +1,17 @@
-const PARK_BOUNDS = { minU: -20, maxU: -4, minV: -20, maxV: -4 };
+const PARK_BOUNDS = { minU: -19, maxU: -3, minV: -19, maxV: -3 };
 const ROAD_BOUNDS = [
-    { id: "mainStreet", minU: -34, maxU: 37, minV: -1, maxV: 1 },
-    { id: "centralAvenue", minU: -1, maxU: 1, minV: -27, maxV: 80 },
-    { id: "westAvenue", minU: -27, maxU: -23, minV: -27, maxV: 80 },
-    { id: "northStreet", minU: -27, maxU: 37, minV: 71, maxV: 73 },
+    { id: "mainStreet", minU: -32, maxU: 36, minV: -1, maxV: 1 },
+    { id: "centralAvenue", minU: -1, maxU: 1, minV: -26, maxV: 78 },
+    { id: "westAvenue", minU: -25, maxU: -21, minV: -26, maxV: 78 },
+    { id: "northStreet", minU: -25, maxU: 36, minV: 69, maxV: 71 },
 ];
 const LOT_BOUNDS = [
-    { id: "W1", minU: -20, maxU: -4, minV: 38, maxV: 54 },
-    { id: "W2", minU: -20, maxU: -4, minV: 21, maxV: 37 },
-    { id: "W3", minU: -20, maxU: -4, minV: 4, maxV: 20 },
-    { id: "E2", minU: 4, maxU: 20, minV: 21, maxV: 37 },
-    { id: "E3", minU: 4, maxU: 20, minV: 4, maxV: 20 },
-    { id: "governorPalace", minU: 4, maxU: 30, minV: 38, maxV: 68 },
+    { id: "W1", minU: -19, maxU: -3, minV: 37, maxV: 53 },
+    { id: "W2", minU: -19, maxU: -3, minV: 20, maxV: 36 },
+    { id: "W3", minU: -19, maxU: -3, minV: 3, maxV: 19 },
+    { id: "E2", minU: 3, maxU: 19, minV: 20, maxV: 36 },
+    { id: "E3", minU: 3, maxU: 19, minV: 3, maxV: 19 },
+    { id: "governorPalace", minU: 3, maxU: 29, minV: 37, maxV: 67 },
 ];
 const LOT_CLEARANCE_HEIGHT = 14;
 

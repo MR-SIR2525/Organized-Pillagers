@@ -1,4 +1,4 @@
-import { world, system, BlockComponentTypes, BlockPermutation } from "@minecraft/server";
+import { world, system, BlockComponentTypes, BlockPermutation, StructureRotation } from "@minecraft/server";
 
 import {
     assignSettlementMembership,
@@ -10,6 +10,7 @@ import {
 import {
     createInitialSettlementBuildPlan,
     createPlayerFacingTestLayout,
+    resolveTestLayoutOrigin,
     createDoorSetblockCommand,
     splitBuildPlacements,
 } from "./settlementBuilder.js";
@@ -106,8 +107,8 @@ system.afterEvents.scriptEventReceive.subscribe(async (event) => {
             case "buildSettlementLayout":
                 buildSettlementLayoutForTest(payload, sourceEntity);
                 break;
-            case "buildFacingTestLayout":
-            case "buildTestLayout":     // friendly alias
+            case "buildTestLayout":
+            case "buildFacingTestLayout":     // alias
                 buildFacingTestLayoutForTest(payload, sourceEntity);
                 break;
             default:
@@ -898,6 +899,28 @@ function placeBuildPlan(dimension, placements, force) {
     }
 }
 
+const STRUCTURE_ROTATIONS = {
+    None: StructureRotation.None,
+    Rotate90: StructureRotation.Rotate90,
+    Rotate180: StructureRotation.Rotate180,
+    Rotate270: StructureRotation.Rotate270,
+};
+
+/**
+ * Structures follow the terrain/lot placement pass. The planner gives house_long its validated
+ * lot-surface Y origin, while its walls occupy the previously cleared volume.
+ */
+function placeStructurePlan(dimension, structurePlacements) {
+    for (const structure of structurePlacements) {
+        const rotation = STRUCTURE_ROTATIONS[structure.rotation];
+        if (rotation === undefined) throw new Error("Unknown structure rotation " + structure.rotation + ".");
+        world.structureManager.place(structure.structureId, dimension, structure.location, {
+            includeEntities: false,
+            rotation,
+        });
+    }
+}
+
 function parseSettlementBuildRequest(payload, sourceEntity) {
     const args = payload.trim().split(/\s+/).filter(Boolean);
     const sourceSettlementId = isUsableEntity(sourceEntity)
@@ -933,6 +956,7 @@ function buildSettlementLayoutForTest(payload, sourceEntity) {
         const dimension = world.getDimension(settlement.dimensionId.replace("minecraft:", ""));
         const plan = createInitialSettlementBuildPlan(settlement);
         placeBuildPlan(dimension, plan.placements, force);
+        placeStructurePlan(dimension, plan.structurePlacements);
         print("§aBuilt settlement #" + settlementId + " (" + plan.orientation + ", force=" + force + ").");
         return true;
     }
@@ -947,20 +971,21 @@ function buildSettlementLayoutForTest(payload, sourceEntity) {
  */
 function buildFacingTestLayoutForTest(payload, sourceEntity) {
     if (!isUsableEntity(sourceEntity) || sourceEntity.typeId !== "minecraft:player") {
+        //revisit this error message ⬇️
         print("§cbuildFacingTestLayout must be invoked directly by a player.");
         return false;
     }
 
     try {
         const force = parseForceFlag(payload.trim());
-        const origin = {
-            x: Math.floor(sourceEntity.location.x),
-            y: Math.floor(sourceEntity.location.y),
-            z: Math.floor(sourceEntity.location.z),
-        };
+        const origin = resolveTestLayoutOrigin(sourceEntity.location);
         const orientation = get_cardinal_direction(sourceEntity.getRotation().y);
         const plan = createPlayerFacingTestLayout(origin, orientation);
         placeBuildPlan(sourceEntity.dimension, plan.placements, force);
+        placeStructurePlan(sourceEntity.dimension, plan.structurePlacements);
+        sourceEntity.dimension.getBlock(plan.orientationMarker.sign)
+            ?.getComponent(BlockComponentTypes.Sign)
+            ?.setText(plan.orientationMarker.text);
         print("§aBuilt one " + orientation + "-facing test layout (force=" + force + ").");
         return true;
     }
