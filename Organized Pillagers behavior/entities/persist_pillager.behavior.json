@@ -957,8 +957,12 @@
       "refresh_avoid_behavior": {
         "queue_command": {"command": [
           "say §7avoid behavior keepalive.",
-          // run unless settled pillagers or players in range
-          "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] unless entity @e[family=player,tag=!pillager_exempt,r=260] unless entity @e[family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
+          // Because avoid_mob_type stops after a few seconds even while a threat remains, 
+          // we use a timer as a workaround (MCPE-182041). 
+          // Keep a villager-first branch so a nearby player and villager do not fire 
+          // the same event twice in one timer cycle.
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] unless entity @e[family=villager,tag=!pillager_exempt,r=260] if entity @e[family=player,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
+          "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] if entity @e[family=villager,tag=!pillager_exempt,r=260] run event entity @s avoid_players_and_villagers",
           
           // run unless settled pillagers in range
           "execute as @s at @s unless entity @e[family=settled_pillager,r=598,rm=1] run event entity @s check_for_nearby_players_or_villagers",
